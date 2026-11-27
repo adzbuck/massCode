@@ -58,7 +58,7 @@ export async function normalizeNotesSelectionState() {
     notesState.folderId = orderedFolders[0]?.id
   }
 
-  await getNotes()
+  const loaded = await getNotes()
 
   // Пустой список — это либо реально пустой vault, либо provisional-кэш
   // периода фоновой сверки: сохранённый выбор не сбрасывается (иначе он
@@ -76,4 +76,5 @@ export async function normalizeNotesSelectionState() {
   // Список содержит только метаданные: полная запись выбранной заметки
   // загружается отдельно (boot и refresh после внешнего sync).
   await refreshSelectedNote()
+  return loaded
 }

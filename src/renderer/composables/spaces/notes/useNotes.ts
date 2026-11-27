@@ -241,6 +241,48 @@ function getActionTargetNotes(targetIds: number[], fallbackNote?: NoteRecord) {
   return targetNotes
 }
 
+export function getLibraryFilterQuery(
+  filter?: (typeof LibraryFilter)[keyof typeof LibraryFilter],
+): NotesQuery {
+  if (filter === LibraryFilter.Favorites) {
+    return { isFavorites: 1 }
+  }
+  if (filter === LibraryFilter.Trash) {
+    return { isDeleted: 1 }
+  }
+  if (filter === LibraryFilter.All) {
+    return { isDeleted: 0 }
+  }
+  if (filter === LibraryFilter.Inbox) {
+    return { isInbox: 1 }
+  }
+  if (filter === LibraryFilter.Tasks) {
+    return { propertyType: 'task' }
+  }
+  if (filter === LibraryFilter.Today) {
+    return {
+      propertyDue: 'today',
+      propertyStatusNot: 'done',
+      propertyType: 'task',
+    }
+  }
+  if (filter === LibraryFilter.Upcoming) {
+    return {
+      propertyDue: 'upcoming',
+      propertyStatusNot: 'done',
+      propertyType: 'task',
+    }
+  }
+  if (filter === LibraryFilter.Completed) {
+    return {
+      propertyStatus: 'done',
+      propertyType: 'task',
+    }
+  }
+
+  return {}
+}
+
 const queryByLibraryOrFolderOrSearch = computed(() => {
   const query: NotesQuery = {}
 
@@ -256,34 +298,8 @@ const queryByLibraryOrFolderOrSearch = computed(() => {
   if (notesState.folderId) {
     query.folderId = notesState.folderId
   }
-  else if (notesState.libraryFilter === LibraryFilter.Favorites) {
-    query.isFavorites = 1
-  }
-  else if (notesState.libraryFilter === LibraryFilter.Trash) {
-    query.isDeleted = 1
-  }
-  else if (notesState.libraryFilter === LibraryFilter.All) {
-    query.isDeleted = 0
-  }
-  else if (notesState.libraryFilter === LibraryFilter.Inbox) {
-    query.isInbox = 1
-  }
-  else if (notesState.libraryFilter === LibraryFilter.Tasks) {
-    query.propertyType = 'task'
-  }
-  else if (notesState.libraryFilter === LibraryFilter.Today) {
-    query.propertyDue = 'today'
-    query.propertyStatusNot = 'done'
-    query.propertyType = 'task'
-  }
-  else if (notesState.libraryFilter === LibraryFilter.Upcoming) {
-    query.propertyDue = 'upcoming'
-    query.propertyStatusNot = 'done'
-    query.propertyType = 'task'
-  }
-  else if (notesState.libraryFilter === LibraryFilter.Completed) {
-    query.propertyStatus = 'done'
-    query.propertyType = 'task'
+  else {
+    Object.assign(query, getLibraryFilterQuery(notesState.libraryFilter))
   }
 
   return query
