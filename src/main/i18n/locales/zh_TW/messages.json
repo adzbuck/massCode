@@ -2,8 +2,7 @@
   "confirm": {
     "delete": "您確定要刪除 \"{{name}}\" 嗎？",
     "deletePermanently": "您確定要永久刪除 \"{{name}}\" 嗎？",
-    "deleteConfirmMultipleSnippets": "您確定要永久刪除已選擇的 {{count}} 個程式碼片段嗎？",
-    "emptyTrash": "您確定要永久刪除回收桶中的所有程式碼片段嗎？"
+    "deleteConfirmMultipleSnippets": "您確定要永久刪除已選擇的 {{count}} 個程式碼片段嗎？"
   },
   "success": {
     "copied": "已複製",
@@ -20,8 +19,7 @@
       "languages"
     ]
   },
-  "error": {
-  },
+  "error": {},
   "description": {
     "storageVault": "Choose the vault directory. To sync between devices, select a folder in iCloud Drive, Google Drive or Dropbox.",
     "language": "To apply language changes, you need to reload the app."

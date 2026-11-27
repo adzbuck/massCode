@@ -6,7 +6,6 @@
     "unprotectHttpSecret": "确定要停止保护 \"{{name}}\" 吗？",
     "deletePermanently": "确定要永久删除 \"{{name}}\" 吗？",
     "deleteConfirmMultipleSnippets": "确定要永久删除选中的 {{count}} 个代码片段吗？",
-    "emptyTrash": "确定要永久清空回收站中的所有代码片段吗？",
     "convertTaskToNote": "确定要将任务 \"{{name}}\" 转换成笔记吗？",
     "moveVaultOverwrite": [
       "确定要覆盖所选目录吗？",

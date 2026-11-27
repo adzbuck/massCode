@@ -5,7 +5,6 @@
     "deleteUnnamedVariable": "이 변수를 삭제하시겠습니까?",
     "deletePermanently": "\"{{name}}\"을(를) 영구적으로 삭제하시겠습니까?",
     "deleteConfirmMultipleSnippets": "선택한 스니펫 {{count}}개를 영구적으로 삭제하시겠습니까?",
-    "emptyTrash": "휴지통에 있는 모든 스니펫을 영구적으로 삭제하시겠습니까?",
     "convertTaskToNote": "\"{{name}}\"을(를) 다시 노트로 변환할까요?",
     "moveVaultOverwrite": [
       "선택한 디렉터리를 덮어쓸까요?",

@@ -6,7 +6,6 @@
     "unprotectHttpSecret": "「{{name}}」の保護を解除しますか?",
     "deletePermanently": "「{{name}}」を完全に削除しますか?",
     "deleteConfirmMultipleSnippets": "選択された{{count}}個のスニペットを完全に削除しますか?",
-    "emptyTrash": "ごみ箱内のすべてのスニペットを完全に削除しますか?",
     "convertTaskToNote": "「{{name}}」をノートに戻しますか?",
     "moveVaultOverwrite": [
       "選択したディレクトリを上書きしますか?",

@@ -2,8 +2,7 @@
   "confirm": {
     "delete": "آیا مطمئن هستید که می‌خواهید \"{{name}}\" را حذف کنید؟",
     "deletePermanently": "آیا مطمئن هستید که می‌خواهید \"{{name}}\" را به طور دائم حذف کنید؟",
-    "deleteConfirmMultipleSnippets": "آیا مطمئن هستید که می‌خواهید {{count}} snippet انتخاب شده را به طور دائم حذف کنید؟",
-    "emptyTrash": "آیا مطمئن هستید که می‌خواهید تمام snippets موجود در سطل زباله را به طور دائم حذف کنید؟"
+    "deleteConfirmMultipleSnippets": "آیا مطمئن هستید که می‌خواهید {{count}} snippet انتخاب شده را به طور دائم حذف کنید؟"
   },
   "success": {
     "copied": "در کلیپ‌بورد کپی شد",
@@ -20,8 +19,7 @@
       "languages"
     ]
   },
-  "error": {
-  },
+  "error": {},
   "description": {
     "storageVault": "Choose the vault directory. To sync between devices, select a folder in iCloud Drive, Google Drive or Dropbox.",
     "language": "To apply language changes, you need to reload the app."

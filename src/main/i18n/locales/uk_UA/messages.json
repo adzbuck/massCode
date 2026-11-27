@@ -2,8 +2,7 @@
   "confirm": {
     "delete": "Ви впевнені, що хочете видалити \"{{name}}\"?",
     "deletePermanently": "Ви впевнені, що хочете назавжди видалити \"{{name}}\"?",
-    "deleteConfirmMultipleSnippets": "Ви впевнені, що хочете назавжди видалити {{count}} вибраних сніпетів?",
-    "emptyTrash": "Ви впевнені, що хочете назавжди видалити всі сніпети у Кошику?"
+    "deleteConfirmMultipleSnippets": "Ви впевнені, що хочете назавжди видалити {{count}} вибраних сніпетів?"
   },
   "success": {
     "copied": "Скопійовано в буфер обміну",
@@ -20,8 +19,7 @@
       "languages"
     ]
   },
-  "error": {
-  },
+  "error": {},
   "description": {
     "storageVault": "Choose the vault directory. To sync between devices, select a folder in iCloud Drive, Google Drive or Dropbox.",
     "language": "To apply language changes, you need to reload the app."

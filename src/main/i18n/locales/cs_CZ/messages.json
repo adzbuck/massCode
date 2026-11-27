@@ -2,8 +2,7 @@
   "confirm": {
     "delete": "Opravdu chcete smazat \"{{name}}\"?",
     "deletePermanently": "Opravdu chcete trvale smazat \"{{name}}\"?",
-    "deleteConfirmMultipleSnippets": "Opravdu chcete trvale smazat {{count}} vybraných snippetů?",
-    "emptyTrash": "Opravdu chcete trvale smazat všechny snippety v Koši?"
+    "deleteConfirmMultipleSnippets": "Opravdu chcete trvale smazat {{count}} vybraných snippetů?"
   },
   "success": {
     "copied": "Zkopírováno do schránky",
@@ -20,8 +19,7 @@
       "languages"
     ]
   },
-  "error": {
-  },
+  "error": {},
   "description": {
     "storageVault": "Choose the vault directory. To sync between devices, select a folder in iCloud Drive, Google Drive or Dropbox.",
     "language": "Pro aplikaci změny jazyka je nutné aplikaci znovu načíst."

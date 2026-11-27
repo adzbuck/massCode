@@ -2,8 +2,7 @@
   "confirm": {
     "delete": "Êtes-vous sûr de vouloir supprimer \"{{name}}\" ?",
     "deletePermanently": "Êtes-vous sûr de vouloir supprimer définitivement \"{{name}}\" ?",
-    "deleteConfirmMultipleSnippets": "Êtes-vous sûr de vouloir supprimer définitivement les {{count}} snippets sélectionnés ?",
-    "emptyTrash": "Êtes-vous sûr de vouloir supprimer définitivement tous les snippets de la Corbeille ?"
+    "deleteConfirmMultipleSnippets": "Êtes-vous sûr de vouloir supprimer définitivement les {{count}} snippets sélectionnés ?"
   },
   "success": {
     "copied": "Copié dans le presse-papiers",
@@ -20,8 +19,7 @@
       "languages"
     ]
   },
-  "error": {
-  },
+  "error": {},
   "description": {
     "storageVault": "Choisissez le répertoire du coffre-fort. Pour synchroniser entre les appareils, sélectionnez un dossier dans iCloud Drive, Google Drive ou Dropbox.",
     "language": "Pour appliquer les changements de langue, vous devez relancer l'application."
@@ -34,4 +32,4 @@
     "available": "La version {{newVersion}} est maintenant disponible au téléchargement.\nVotre version est {{oldVersion}}.",
     "noAvailable": "Il n'y a actuellement aucune mise à jour disponible."
   }
- }
+}
