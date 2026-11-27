@@ -53,7 +53,7 @@ const taskItems = [
   },
   {
     id: LibraryFilter.Tasks,
-    name: i18n.t('notes.tasks.title'),
+    name: i18n.t('notes.tasks.allTasks', { defaultValue: 'All Tasks' }),
     icon: ListTodo,
   },
   {

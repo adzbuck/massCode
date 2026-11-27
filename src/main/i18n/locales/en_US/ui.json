@@ -1053,6 +1053,7 @@
     },
     "tasks": {
       "title": "Tasks",
+      "allTasks": "All Tasks",
       "kanbanView": "Kanban board",
       "listView": "List view",
       "emptyColumn": "No tasks",
