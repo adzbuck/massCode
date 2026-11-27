@@ -207,6 +207,7 @@ it('pins cloud credentials to official provider endpoints', async () => {
     'mistral',
     'xai',
     'openrouter',
+    'copilot',
   ] as const) {
     expect(() =>
       canonicalAiURL(provider, 'https://unrelated.invalid/v1'),

@@ -148,6 +148,7 @@ export async function checkResponse(response: Response) {
         if (response.status === 400 && typeof detail === 'string') {
           const message = detail
             .replace(/sk-[\w-]+/g, '[redacted]')
+            .replace(/(?:gh[pousr]|github_pat)_[\w-]+/g, '[redacted]')
             .replace(/Bearer\s+\S+/gi, 'Bearer [redacted]')
             .replace(/\s+/g, ' ')
             .slice(0, 500)

@@ -27,7 +27,7 @@ import { replayToolArguments } from './tools'
 export function isSdkProvider(provider?: AiProvider) {
   return (
     provider !== undefined
-    && !['openai', 'ollama', 'lmstudio'].includes(provider)
+    && !['openai', 'copilot', 'ollama', 'lmstudio'].includes(provider)
   )
 }
 
@@ -109,6 +109,7 @@ function sdkModel(
     case 'xai':
       return createXai(config)(connection.model)
     case 'openai':
+    case 'copilot':
     case 'ollama':
     case 'lmstudio':
     case undefined:

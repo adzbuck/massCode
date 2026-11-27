@@ -20,6 +20,7 @@ export const aiProviderSchema = z.enum([
   'mistral',
   'xai',
   'openrouter',
+  'copilot',
   'ollama',
   'lmstudio',
 ])
@@ -32,6 +33,7 @@ export const AI_DEFAULT_URLS: Record<AiProvider, string> = {
   mistral: 'https://api.mistral.ai/v1',
   xai: 'https://api.x.ai/v1',
   openrouter: 'https://openrouter.ai/api/v1',
+  copilot: 'https://api.githubcopilot.com',
   ollama: 'http://localhost:11434/v1',
   lmstudio: 'http://localhost:1234/v1',
 }

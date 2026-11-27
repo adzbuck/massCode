@@ -1512,7 +1512,8 @@
       "deepseek": "DeepSeek",
       "mistral": "Mistral",
       "xai": "xAI",
-      "openrouter": "OpenRouter"
+      "openrouter": "OpenRouter",
+      "copilot": "GitHub Copilot"
     },
     "baseURL": "Server URL",
     "apiKey": "API key",
