@@ -12,6 +12,7 @@ interface SetupOptions {
   folderId?: number
   hideCompletedTasksInFolders?: boolean
   isSearch?: boolean
+  isTasksKanbanActive?: boolean
   libraryFilter?: string
   nextNotes?: Array<{
     id: number
@@ -43,6 +44,7 @@ async function setup(options: SetupOptions = {}) {
   const hideCompletedTasksInFolders = ref(
     options.hideCompletedTasksInFolders ?? false,
   )
+  const isTasksKanbanActive = ref(options.isTasksKanbanActive ?? false)
   const nextNotes = options.nextNotes ?? [{ id: 2 }]
   const markPersistedStorageMutation = vi.fn()
   const patchNotesByIdProperties = vi.fn(async () => undefined)
@@ -132,6 +134,7 @@ async function setup(options: SetupOptions = {}) {
     useNotesApp: () => ({
       focusNoteNameInput: vi.fn(),
       hideCompletedTasksInFolders,
+      isTasksKanbanActive,
       notesCreateKind,
       notesState,
     }),
@@ -504,21 +507,14 @@ describe('useNotes', () => {
     expect(context.getNotes).toHaveBeenCalledWith(expectedQuery)
   })
 
-  it('keeps the Todo library filter when creating a new task from Todo', async () => {
-    const context = await setup({
-      libraryFilter: 'todo',
-      nextNotes: [{ id: 7, folder: null, name: 'Created Task' }],
-    })
-
-    await context.useNotes().createTaskAndSelect()
-
-    expect(context.notesState.libraryFilter).toBe('todo')
-    expect(context.notesState.noteId).toBe(7)
-  })
-
-  it.each(['inProgress', 'blocked'] as const)(
-    'switches %s task status filter to Tasks when creating a new todo task',
-    async (libraryFilter) => {
+  it.each([
+    ['todo', 'todo'],
+    ['inProgress', 'inProgress'],
+    ['blocked', 'blocked'],
+    ['completed', 'done'],
+  ] as const)(
+    'defaults new task status to %s and keeps the %s library filter when creating a task',
+    async (libraryFilter, expectedStatus) => {
       const context = await setup({
         libraryFilter,
         nextNotes: [{ id: 7, folder: null, name: 'Created Task' }],
@@ -526,6 +522,42 @@ describe('useNotes', () => {
 
       await context.useNotes().createTaskAndSelect()
 
+      expect(context.postNotes).toHaveBeenCalledWith(
+        expect.objectContaining({
+          properties: {
+            status: expectedStatus,
+            type: 'task',
+          },
+        }),
+      )
+      expect(context.notesState.libraryFilter).toBe(libraryFilter)
+      expect(context.notesState.noteId).toBe(7)
+    },
+  )
+
+  it.each(['inProgress', 'blocked', 'completed'] as const)(
+    'respects explicit status payload from createTaskStatusPatch and switches %s filter to Tasks when mismatched',
+    async (libraryFilter) => {
+      const { createTaskStatusPatch, NoteTaskStatus } = await import(
+        '../taskProperties'
+      )
+      const context = await setup({
+        libraryFilter,
+        nextNotes: [{ id: 7, folder: null, name: 'Created Task' }],
+      })
+
+      await context
+        .useNotes()
+        .createTaskAndSelect(createTaskStatusPatch(NoteTaskStatus.Todo))
+
+      expect(context.postNotes).toHaveBeenCalledWith(
+        expect.objectContaining({
+          properties: {
+            status: 'todo',
+            type: 'task',
+          },
+        }),
+      )
       expect(context.notesState.libraryFilter).toBe('tasks')
       expect(context.notesState.noteId).toBe(7)
     },
@@ -576,6 +608,16 @@ describe('useNotes', () => {
     await completedContext.useNotes().getNotes()
     expect(completedContext.getNotes).toHaveBeenCalledWith({
       propertyStatus: 'done',
+      propertyType: 'task',
+    })
+
+    const kanbanContext = await setup({
+      hideCompletedTasksInFolders: true,
+      isTasksKanbanActive: true,
+      libraryFilter: 'tasks',
+    })
+    await kanbanContext.useNotes().getNotes()
+    expect(kanbanContext.getNotes).toHaveBeenCalledWith({
       propertyType: 'task',
     })
   })

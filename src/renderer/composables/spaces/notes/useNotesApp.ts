@@ -1,4 +1,3 @@
-import type { LibraryFilter } from '../../types'
 import { store } from '@/electron'
 import { watchDebounced } from '@vueuse/core'
 import {
@@ -6,6 +5,7 @@ import {
   getNextLayoutModeForSidebarToggle,
   type LayoutMode,
 } from '../../layoutModes'
+import { LibraryFilter } from '../../types'
 
 export type NotesStateAction = 'beforeSearch'
 
@@ -51,6 +51,21 @@ const hideCompletedTasksInFolders = ref<boolean>(
   ?? false,
 )
 
+const isTasksKanbanView = ref<boolean>(
+  (store.app.get('notes.tasksKanbanView') as boolean | undefined) ?? false,
+)
+
+const isViewingTasks = computed(
+  () =>
+    !notesState.folderId
+    && !notesState.tagId
+    && notesState.libraryFilter === LibraryFilter.Tasks,
+)
+
+const isTasksKanbanActive = computed(
+  () => isViewingTasks.value && isTasksKanbanView.value,
+)
+
 watch(notesEditorMode, (mode) => {
   store.app.set('notes.editorMode', mode)
 })
@@ -61,6 +76,10 @@ watch(notesCreateKind, (kind) => {
 
 watch(hideCompletedTasksInFolders, (value) => {
   store.app.set('notes.hideCompletedTasksInFolders', value)
+})
+
+watch(isTasksKanbanView, (value) => {
+  store.app.set('notes.tasksKanbanView', value)
 })
 
 const notesInspectorTab = ref<'outline' | 'links' | 'annotations'>(
@@ -187,6 +206,10 @@ function showNotesPresentation() {
   isNotesMindmapShown.value = false
 }
 
+function toggleTasksKanbanView() {
+  isTasksKanbanView.value = !isTasksKanbanView.value
+}
+
 async function focusNoteNameInput() {
   isFocusedNoteName.value = false
   await nextTick()
@@ -231,6 +254,9 @@ export function useNotesApp() {
     notesEditorMode,
     notesCreateKind,
     hideCompletedTasksInFolders,
+    isTasksKanbanView,
+    isViewingTasks,
+    isTasksKanbanActive,
     isNotesSidebarHidden,
     isNotesSpaceInitialized,
     pendingNotesNavigation,
@@ -246,5 +272,6 @@ export function useNotesApp() {
     showNotesEditorOnly,
     stateSnapshots,
     toggleNotesSidebar,
+    toggleTasksKanbanView,
   }
 }

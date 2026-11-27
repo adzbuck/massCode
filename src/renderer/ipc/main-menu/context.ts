@@ -22,6 +22,7 @@ interface NotesMenuState {
   hasSelectedNote: boolean
   isMindmapShown: boolean
   isPresentationShown: boolean
+  isTasksKanbanView?: boolean
   mode: NotesEditorMode
 }
 
@@ -36,6 +37,7 @@ interface CreateMainMenuContextOptions {
   activeSpaceId: SpaceId | null
   compactListMode: boolean
   hideCompletedTasksInFolders: boolean
+  tasksKanbanView?: boolean
   contentSort: {
     code: { sort: ContentSortField, order: ContentSortOrder }
     notes: { sort: ContentSortField, order: ContentSortOrder }
@@ -76,6 +78,8 @@ export function createMainMenuContext(
         isCompactMode: options.compactListMode,
         canToggleHideCompletedTasks: false,
         isHideCompletedTasksInFolders: false,
+        canToggleTasksKanban: false,
+        isTasksKanbanView: false,
         isMindmapShown: false,
         canTogglePresentation: false,
         isPresentationShown: false,
@@ -120,6 +124,10 @@ export function createMainMenuContext(
         isCompactMode: options.compactListMode,
         canToggleHideCompletedTasks: true,
         isHideCompletedTasksInFolders: options.hideCompletedTasksInFolders,
+        canToggleTasksKanban: true,
+        isTasksKanbanView: Boolean(
+          options.tasksKanbanView ?? options.notes.isTasksKanbanView,
+        ),
         isMindmapShown: options.notes.isMindmapShown,
         canTogglePresentation: options.notes.hasSelectedNote,
         isPresentationShown: options.notes.isPresentationShown,
@@ -163,6 +171,8 @@ export function createMainMenuContext(
         isCompactMode: false,
         canToggleHideCompletedTasks: false,
         isHideCompletedTasksInFolders: false,
+        canToggleTasksKanban: false,
+        isTasksKanbanView: false,
         isMindmapShown: false,
         canTogglePresentation: false,
         isPresentationShown: false,
@@ -200,6 +210,8 @@ export function createMainMenuContext(
         isCompactMode: options.compactListMode,
         canToggleHideCompletedTasks: false,
         isHideCompletedTasksInFolders: false,
+        canToggleTasksKanban: false,
+        isTasksKanbanView: false,
         isMindmapShown: false,
         canTogglePresentation: false,
         isPresentationShown: false,
@@ -237,6 +249,8 @@ export function createMainMenuContext(
         isCompactMode: false,
         canToggleHideCompletedTasks: false,
         isHideCompletedTasksInFolders: false,
+        canToggleTasksKanban: false,
+        isTasksKanbanView: false,
         isMindmapShown: false,
         canTogglePresentation: false,
         isPresentationShown: false,
@@ -271,6 +285,8 @@ export function createMainMenuContext(
       canToggleCompactMode: false,
       canToggleHideCompletedTasks: false,
       isHideCompletedTasksInFolders: false,
+      canToggleTasksKanban: false,
+      isTasksKanbanView: false,
       canToggleMindmap: false,
       isCompactMode: false,
       isMindmapShown: false,

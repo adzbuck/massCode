@@ -40,6 +40,8 @@ export interface MainMenuViewContext {
   isCompactMode: boolean
   canToggleHideCompletedTasks: boolean
   isHideCompletedTasksInFolders: boolean
+  canToggleTasksKanban?: boolean
+  isTasksKanbanView?: boolean
   canToggleMindmap: boolean
   isMindmapShown: boolean
   canTogglePresentation: boolean

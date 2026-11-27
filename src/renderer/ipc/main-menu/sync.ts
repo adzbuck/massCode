@@ -30,6 +30,7 @@ const {
   notesEditorMode,
   notesLayoutMode,
   hideCompletedTasksInFolders,
+  isTasksKanbanView,
 } = useNotesApp()
 const { bottomOpen, inspectorOpen } = useHttpPanels()
 const { httpLayoutMode, httpState } = useHttpApp()
@@ -74,6 +75,7 @@ export function registerMainMenuContextSync() {
         notesLayoutMode.value,
         notesEditorMode.value,
         hideCompletedTasksInFolders.value,
+        isTasksKanbanView.value,
         httpLayoutMode.value,
         bottomOpen.value,
         inspectorOpen.value,
@@ -110,6 +112,7 @@ export function registerMainMenuContextSync() {
             : undefined,
           compactListMode: isCompactListMode.value,
           hideCompletedTasksInFolders: hideCompletedTasksInFolders.value,
+          tasksKanbanView: isTasksKanbanView.value,
           contentSort: {
             code: { ...contentSortState.code },
             notes: { ...contentSortState.notes },
@@ -135,6 +138,7 @@ export function registerMainMenuContextSync() {
             hasSelectedNote: Boolean(selectedNote.value),
             isMindmapShown: isNotesMindmapShown.value,
             isPresentationShown: isNotesPresentationShown.value,
+            isTasksKanbanView: isTasksKanbanView.value,
             layoutMode: notesLayoutMode.value,
             mode: notesEditorMode.value,
           },

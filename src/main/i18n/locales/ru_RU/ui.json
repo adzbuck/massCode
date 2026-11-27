@@ -1062,6 +1062,10 @@
     },
     "tasks": {
       "title": "Задачи",
+      "kanbanView": "Канбан-доска",
+      "listView": "Вид списка",
+      "emptyColumn": "Нет задач",
+      "moveTo": "Переместить в",
       "today": "Сегодня",
       "upcoming": "Предстоящие",
       "completed": "Завершённые",

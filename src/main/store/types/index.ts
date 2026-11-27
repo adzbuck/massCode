@@ -144,6 +144,7 @@ export interface AppStore {
     route: NotesRouteName
     editorMode: NotesEditorMode
     hideCompletedTasksInFolders: boolean
+    tasksKanbanView: boolean
     lastTasksCleanupAt: number
     dashboard: {
       widgets: NotesDashboardWidgets

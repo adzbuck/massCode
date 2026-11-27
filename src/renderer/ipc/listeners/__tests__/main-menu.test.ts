@@ -9,6 +9,12 @@ async function setup() {
   const selectedNote = ref<{ id: number }>()
   const isNotesInspectorOpen = ref(false)
   const isNotesMindmapShown = ref(false)
+  const isTasksKanbanView = ref(false)
+  const isViewingTasks = ref(false)
+  const toggleTasksKanbanView = vi.fn(() => {
+    isTasksKanbanView.value = !isTasksKanbanView.value
+  })
+  const openNotesLibrary = vi.fn(async () => undefined)
   const bottomOpen = ref(true)
   const inspectorOpen = ref(false)
   const httpState = { activePanel: 'request' }
@@ -94,11 +100,17 @@ async function setup() {
       isNotesMindmapShown,
       isNotesInspectorOpen,
       isNotesPresentationShown: ref(false),
+      isTasksKanbanView,
+      isViewingTasks,
       notesEditorMode: ref('livePreview'),
       setNotesLayoutMode: vi.fn(),
       showNotesMindmap: vi.fn(),
       showNotesPresentation: vi.fn(),
       toggleNotesSidebar: vi.fn(),
+      toggleTasksKanbanView,
+    }),
+    useNotesWorkspaceNavigation: () => ({
+      openNotesLibrary,
     }),
     useHttpApp: () => ({
       setHttpLayoutMode: vi.fn(),
@@ -168,6 +180,10 @@ async function setup() {
     selectedNote,
     isNotesInspectorOpen,
     isNotesMindmapShown,
+    isTasksKanbanView,
+    isViewingTasks,
+    toggleTasksKanbanView,
+    openNotesLibrary,
     bottomOpen,
     inspectorOpen,
     httpState,
@@ -310,6 +326,27 @@ describe('registerMainMenuListeners', () => {
     expect(context.getSnippets).not.toHaveBeenCalled()
     expect(context.getNotes).not.toHaveBeenCalled()
     expect(context.getHttpRequests).not.toHaveBeenCalled()
+  })
+  it('toggles tasks kanban view and opens tasks library when not currently viewing tasks', async () => {
+    const context = await setup()
+    context.getActiveSpaceId.mockReturnValue('notes')
+
+    const toggleKanban = context.ipcHandlers.get(
+      'main-menu:toggle-tasks-kanban',
+    )
+
+    await toggleKanban?.()
+
+    expect(context.isTasksKanbanView.value).toBe(true)
+    expect(context.openNotesLibrary).toHaveBeenCalledWith('tasks')
+
+    context.isViewingTasks.value = true
+    context.hideCompletedTasksInFolders.value = true
+    await toggleKanban?.()
+
+    expect(context.toggleTasksKanbanView).toHaveBeenCalledTimes(1)
+    expect(context.isTasksKanbanView.value).toBe(false)
+    expect(context.normalizeNotesSelectionState).toHaveBeenCalledTimes(1)
   })
 })
 

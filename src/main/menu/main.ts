@@ -41,6 +41,8 @@ const defaultMainMenuContext: MainMenuContext = {
     canToggleCompactMode: false,
     canToggleHideCompletedTasks: false,
     isHideCompletedTasksInFolders: false,
+    canToggleTasksKanban: false,
+    isTasksKanbanView: false,
     canToggleMindmap: false,
     isCompactMode: false,
     isMindmapShown: false,
@@ -510,6 +512,19 @@ function createViewMenuItems(context: MainMenuContext): MenuConfig[] {
       type: 'checkbox',
       checked: context.view.isHideCompletedTasksInFolders,
       click: () => send('main-menu:toggle-hide-completed-tasks'),
+    })
+  }
+
+  if (context.view.canToggleTasksKanban) {
+    if (items.length && !context.view.canToggleHideCompletedTasks) {
+      items.push({ type: 'separator' })
+    }
+
+    items.push({
+      label: i18n.t('menu:view.tasksKanban'),
+      type: 'checkbox',
+      checked: Boolean(context.view.isTasksKanbanView),
+      click: () => send('main-menu:toggle-tasks-kanban'),
     })
   }
 

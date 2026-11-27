@@ -651,3 +651,30 @@ it.each([true, false])(
     })
   },
 )
+
+it('renders and dispatches the Tasks Kanban checkbox in the View menu', async () => {
+  const { createMainMenu } = await import('../main')
+  const context = createNotesContext()
+  context.view.canToggleTasksKanban = true
+  context.view.isTasksKanbanView = true
+  buildFromTemplate.mockClear()
+  createMainMenu(context)
+  const template = buildFromTemplate.mock.calls[0]![0] as Array<{
+    label?: string
+    submenu?: Array<{
+      label?: string
+      type?: string
+      checked?: boolean
+      click?: () => void
+    }>
+  }>
+  const item = template
+    .find(item => item.label === 'menu:view.label')!
+    .submenu!.find(item => item.label === 'menu:view.tasksKanban')!
+  expect(item).toMatchObject({
+    type: 'checkbox',
+    checked: true,
+  })
+  item.click!()
+  expect(send).toHaveBeenLastCalledWith('main-menu:toggle-tasks-kanban')
+})

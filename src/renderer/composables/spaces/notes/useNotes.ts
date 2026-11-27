@@ -19,6 +19,7 @@ const {
   focusNoteNameInput,
   notesCreateKind,
   hideCompletedTasksInFolders,
+  isTasksKanbanActive,
 } = useNotesApp()
 const { getContentSortQuery } = useContentSort()
 
@@ -480,7 +481,8 @@ export async function getNotes(query?: NotesQuery) {
     if (
       hideCompletedTasksInFolders.value
       && (resolvedQuery.folderId !== undefined
-        || (resolvedQuery.propertyType === 'task'
+        || (!isTasksKanbanActive.value
+          && resolvedQuery.propertyType === 'task'
           && resolvedQuery.propertyStatus === undefined
           && resolvedQuery.propertyStatusNot === undefined))
     ) {
@@ -572,11 +574,16 @@ async function createNoteAndSelect(payload?: CreateNotePayload) {
 
 async function createTaskAndSelect(payload?: CreateNotePayload) {
   notesCreateKind.value = 'task'
+  const defaultStatus
+    = !notesState.folderId && !notesState.tagId && notesState.libraryFilter
+      ? (LIBRARY_FILTER_REQUIRED_TASK_STATUS[notesState.libraryFilter]
+        ?? NoteTaskStatus.Todo)
+      : NoteTaskStatus.Todo
   await createNoteWithPayloadAndSelect({
     ...payload,
     properties: {
+      status: defaultStatus,
       ...payload?.properties,
-      status: NoteTaskStatus.Todo,
       type: 'task',
     },
   })

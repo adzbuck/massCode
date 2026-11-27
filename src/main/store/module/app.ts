@@ -80,6 +80,7 @@ const APP_STORE_DEFAULTS: AppStore = {
     route: 'notes-space',
     editorMode: 'livePreview',
     hideCompletedTasksInFolders: false,
+    tasksKanbanView: false,
     lastTasksCleanupAt: 0,
     dashboard: {
       widgets: {
@@ -817,6 +818,10 @@ function sanitizeAppStore(value: unknown): AppStore {
         typeof notesSource.hideCompletedTasksInFolders === 'boolean'
           ? notesSource.hideCompletedTasksInFolders
           : APP_STORE_DEFAULTS.notes.hideCompletedTasksInFolders,
+      tasksKanbanView:
+        typeof notesSource.tasksKanbanView === 'boolean'
+          ? notesSource.tasksKanbanView
+          : APP_STORE_DEFAULTS.notes.tasksKanbanView,
       lastTasksCleanupAt: readNumber(
         notesSource,
         'lastTasksCleanupAt',
