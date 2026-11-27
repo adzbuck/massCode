@@ -299,6 +299,25 @@ describe('useNotes', () => {
     expect(context.selectedNoteIds.value).toEqual([2])
   })
 
+  it('clears the selected and displayed note records when property updates leave the active list empty', async () => {
+    const context = await setup({
+      nextNotes: [],
+      noteId: 1,
+    })
+    const notes = context.useNotes()
+    await notes.refreshSelectedNote()
+    expect(notes.displayedNoteRecord.value?.id).toBe(1)
+
+    await notes.updateNoteProperties(1, {
+      properties: { status: 'done' },
+    })
+
+    expect(context.notesState.noteId).toBeUndefined()
+    expect(context.selectedNoteIds.value).toEqual([])
+    expect(notes.displayedNoteRecord.value).toBeUndefined()
+    expect(notes.selectedNoteRecordStatus.value).toBe('idle')
+  })
+
   it('keeps the current selection when property updates leave it in the active list', async () => {
     const context = await setup({
       nextNotes: [{ id: 1 }, { id: 2 }],

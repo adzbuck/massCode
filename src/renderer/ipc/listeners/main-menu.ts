@@ -4,6 +4,7 @@ import {
   isContentSortField,
   isContentSortOrder,
   isSortableContentSpaceId,
+  normalizeNotesSelectionState,
   useApp,
   useContentSort,
   useEditor,
@@ -180,7 +181,7 @@ export function registerMainMenuListeners() {
     }
 
     hideCompletedTasksInFolders.value = !hideCompletedTasksInFolders.value
-    await getNotes()
+    await normalizeNotesSelectionState()
   })
 
   ipc.on('main-menu:goto-math-notebook', () => {

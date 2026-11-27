@@ -14,6 +14,8 @@ interface SetupOptions {
   displayedNoteIds?: number[]
   folderId?: number
   folders?: FolderNode[]
+  hideCompletedTasksInFolders?: boolean
+  libraryFilter?: string
   noteId?: number
   tagId?: number
   tags?: Array<{ id: number, name: string }>
@@ -29,9 +31,13 @@ async function setup(options: SetupOptions = {}) {
     tagId?: number
   }>({
     folderId: options.folderId,
+    libraryFilter: options.libraryFilter,
     noteId: options.noteId,
     tagId: options.tagId,
   })
+  const hideCompletedTasksInFolders = ref(
+    options.hideCompletedTasksInFolders ?? false,
+  )
 
   const folders = ref<FolderNode[] | undefined>(
     options.folders ?? [
@@ -52,6 +58,7 @@ async function setup(options: SetupOptions = {}) {
 
   vi.doMock('../useNotesApp', () => ({
     useNotesApp: () => ({
+      hideCompletedTasksInFolders,
       notesState,
     }),
   }))
@@ -137,5 +144,19 @@ describe('normalizeNotesSelectionState', () => {
 
     expect(context.selectFirstNote).toHaveBeenCalledTimes(1)
     expect(context.notesState.noteId).toBe(3)
+  })
+
+  it('clears selection when hideCompletedTasksInFolders filters out the last note in a folder', async () => {
+    const context = await setup({
+      displayedNoteIds: [],
+      folderId: 11,
+      hideCompletedTasksInFolders: true,
+      noteId: 99,
+    })
+
+    await context.normalizeNotesSelectionState()
+
+    expect(context.selectFirstNote).toHaveBeenCalledTimes(1)
+    expect(context.notesState.noteId).toBeUndefined()
   })
 })

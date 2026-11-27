@@ -721,8 +721,10 @@ async function updateNoteProperties(
   markPersistedStorageMutation()
   await api.notes.patchNotesByIdProperties(String(noteId), data)
   await getNotes(queryByLibraryOrFolderOrSearch.value)
-  await refreshSelectedNote()
   selectFirstNoteIfCurrentSelectionIsMissing(previousNoteId)
+  if (notesState.noteId === previousNoteId) {
+    await refreshSelectedNote()
+  }
 }
 
 async function deleteNote(noteId: number) {
@@ -976,6 +978,15 @@ export function selectNote(noteId: number, withShift = false) {
   }
 }
 
+function clearNoteSelection() {
+  notesState.noteId = undefined
+  selectedNoteIds.value = []
+  lastSelectedNoteId.value = undefined
+  selectedNoteRecord.value = undefined
+  displayedNoteRecord.value = undefined
+  selectedNoteRecordStatus.value = 'idle'
+}
+
 export function selectFirstNote() {
   let firstNote: NoteRecord | undefined
 
@@ -992,9 +1003,7 @@ export function selectFirstNote() {
     lastSelectedNoteId.value = firstNote.id
   }
   else {
-    notesState.noteId = undefined
-    selectedNoteIds.value = []
-    lastSelectedNoteId.value = undefined
+    clearNoteSelection()
   }
 }
 
@@ -1005,11 +1014,7 @@ function clearNotes() {
 
 function clearNotesState() {
   clearNotes()
-  selectedNoteIds.value = []
-  selectedNoteRecord.value = undefined
-  displayedNoteRecord.value = undefined
-  selectedNoteRecordStatus.value = 'idle'
-  notesState.noteId = undefined
+  clearNoteSelection()
 }
 
 export function useNotes() {

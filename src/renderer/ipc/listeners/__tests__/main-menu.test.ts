@@ -38,13 +38,16 @@ async function setup() {
   const getHttpRequests = vi.fn(async () => undefined)
   const getNotes = vi.fn(async () => undefined)
   const getSnippets = vi.fn(async () => undefined)
+  const normalizeNotesSelectionState = vi.fn(async () => undefined)
   const setContentSortField = vi.fn()
   const setContentSortOrder = vi.fn()
   const currentDraft = ref({ url: 'https://example.com' })
   const isExecuting = ref(false)
   const getActiveSpaceId = vi.fn(() => 'code')
+  const hideCompletedTasksInFolders = ref(false)
 
   vi.doMock('@/composables', () => ({
+    normalizeNotesSelectionState,
     useApp: () => ({
       codeLayoutMode: ref('all-panels'),
       isCompactListMode: ref(false),
@@ -86,6 +89,7 @@ async function setup() {
       selectedNote,
     }),
     useNotesApp: () => ({
+      hideCompletedTasksInFolders,
       hideNotesViewModes: vi.fn(),
       isNotesMindmapShown,
       isNotesInspectorOpen,
@@ -177,9 +181,11 @@ async function setup() {
     getHttpRequests,
     getNotes,
     getSnippets,
+    hideCompletedTasksInFolders,
     isExecuting,
     navigateBack,
     navigateForward,
+    normalizeNotesSelectionState,
     saveCurrentRequest,
     setContentSortField,
     setContentSortOrder,
@@ -209,6 +215,16 @@ describe('registerMainMenuListeners', () => {
 
     expect(context.createNoteAndSelect).toHaveBeenCalledTimes(1)
     expect(context.createTaskAndSelect).toHaveBeenCalledTimes(1)
+  })
+
+  it('normalizes notes selection state when toggling hide completed tasks in notes space', async () => {
+    const context = await setup()
+    context.getActiveSpaceId.mockReturnValue('notes')
+
+    await context.ipcHandlers.get('main-menu:toggle-hide-completed-tasks')?.()
+
+    expect(context.hideCompletedTasksInFolders.value).toBe(true)
+    expect(context.normalizeNotesSelectionState).toHaveBeenCalledTimes(1)
   })
 
   it('sends the current http draft without implicitly saving it', async () => {

@@ -65,8 +65,10 @@ export async function normalizeNotesSelectionState() {
   // затёрся бы в store.app и после reconcile не восстановился).
   if (
     notesState.noteId !== undefined
-    && displayedNotes.value?.length
-    && !displayedNotes.value.some(note => note.id === notesState.noteId)
+    && (displayedNotes.value?.length
+      || notesState.libraryFilter !== undefined
+      || useNotesApp().hideCompletedTasksInFolders.value)
+    && !displayedNotes.value?.some(note => note.id === notesState.noteId)
   ) {
     selectFirstNote()
   }
