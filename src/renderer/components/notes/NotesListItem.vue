@@ -12,6 +12,7 @@ import {
   useNavigationHistory,
   useNotes,
   useNotesApp,
+  useNoteSearch,
 } from '@/composables'
 import { useDateFormat } from '@/composables/useDateFormat'
 import { i18n } from '@/electron'
@@ -57,6 +58,7 @@ const { highlightedNoteIds, highlightedFolderIds, focusedNoteId, notesState }
   = useNotesApp()
 
 const { selectNote, selectedNoteIds, updateNoteProperties } = useNotes()
+const { displayedNotes } = useNoteSearch()
 
 const isSelected = computed(() => notesState.noteId === props.note.id)
 
@@ -164,9 +166,19 @@ async function onTaskDoneChange() {
 
 function onDragStart(event: DragEvent) {
   const ids
-    = selectedNoteIds.value.length > 1 ? selectedNoteIds.value : [props.note.id]
+    = selectedNoteIds.value.length > 1 && selectedNoteIds.value.includes(props.note.id)
+      ? selectedNoteIds.value
+      : [props.note.id]
+  const draggedItems
+    = displayedNotes.value?.filter(n => ids.includes(n.id)) ?? [props.note]
 
   event.dataTransfer?.setData('noteIds', JSON.stringify(ids))
+  if (draggedItems.some(item => !isTaskNote(item))) {
+    event.dataTransfer?.setData('application/x-masscode-note', '1')
+  }
+  if (draggedItems.some(item => isTaskNote(item))) {
+    event.dataTransfer?.setData('application/x-masscode-task', '1')
+  }
 
   const el = document.createElement('div')
 

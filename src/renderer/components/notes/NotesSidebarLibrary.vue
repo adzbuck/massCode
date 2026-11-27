@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import * as ContextMenu from '@/components/ui/shadcn/context-menu'
-import { useNoteFolders, useNotes, useNotesApp } from '@/composables'
+import {
+  isTaskNote,
+  useNoteFolders,
+  useNotes,
+  useNotesApp,
+  useNoteSearch,
+} from '@/composables'
 import { useNotesWorkspaceNavigation } from '@/composables/spaces/notes/useNotesWorkspaceNavigation'
 import { LibraryFilter } from '@/composables/types'
 import { i18n } from '@/electron'
@@ -18,6 +24,7 @@ import { useRoute } from 'vue-router'
 const { notesCreateKind, notesState } = useNotesApp()
 const { getNoteFolders } = useNoteFolders()
 const { emptyTrash, selectFirstNote, updateNotes } = useNotes()
+const { displayedNotes } = useNoteSearch()
 const { openNotesLibrary } = useNotesWorkspaceNavigation()
 const route = useRoute()
 
@@ -69,8 +76,40 @@ function parseDroppedNoteIds(dataTransfer: DataTransfer | null): number[] {
   return Number.isFinite(plainId) && plainId > 0 ? [plainId] : []
 }
 
+function canAcceptDrag(dataTransfer: DataTransfer | null): boolean {
+  const types = dataTransfer?.types
+  if (
+    types?.includes('application/x-masscode-task')
+    || types?.includes('application/x-masscode-note')
+  ) {
+    return types.includes('application/x-masscode-note')
+  }
+
+  return (displayedNotes.value ?? []).some(note => !isTaskNote(note))
+}
+
+function getValidDroppedNoteIds(dataTransfer: DataTransfer | null): number[] {
+  const rawIds = parseDroppedNoteIds(dataTransfer)
+  if (!rawIds.length) {
+    return []
+  }
+
+  const notesList = displayedNotes.value
+  if (!notesList) {
+    return []
+  }
+
+  return rawIds.filter((id) => {
+    const note = notesList.find(item => item.id === id)
+    return note ? !isTaskNote(note) : false
+  })
+}
+
 function onDragOver(item: (typeof libraryItems)[number], event: DragEvent) {
-  if (!isDroppableItem(item.id)) {
+  if (!isDroppableItem(item.id) || !canAcceptDrag(event.dataTransfer)) {
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'none'
+    }
     return
   }
 
@@ -99,7 +138,7 @@ async function onDrop(item: (typeof libraryItems)[number], event: DragEvent) {
   }
 
   event.preventDefault()
-  const noteIds = parseDroppedNoteIds(event.dataTransfer)
+  const noteIds = getValidDroppedNoteIds(event.dataTransfer)
   if (!noteIds.length) {
     return
   }

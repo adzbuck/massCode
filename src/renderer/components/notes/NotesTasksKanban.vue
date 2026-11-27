@@ -102,6 +102,7 @@ function onDragStart(noteId: number, event: DragEvent) {
     event.dataTransfer.effectAllowed = 'move'
     event.dataTransfer.setData('text/plain', String(noteId))
     event.dataTransfer.setData('noteIds', JSON.stringify([noteId]))
+    event.dataTransfer.setData('application/x-masscode-task', '1')
   }
 }
 
