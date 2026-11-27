@@ -82,6 +82,7 @@ const {
   deleteSelectedNoteFolders,
   updateNoteFolder,
   getFolderByIdFromTree,
+  getNoteFolders,
   selectedFolderIds,
   renameFolderId,
   selectNoteFolder,
@@ -91,6 +92,12 @@ const { getNotes, withNotesLoading, selectFirstNote, isRestoreStateBlocked }
 const { clearSearch } = useNoteSearch()
 const { onDragNode, onExternalDrop } = useNoteFolderDragDrop()
 const route = useRoute()
+
+onMounted(() => {
+  if (!folders.value) {
+    void getNoteFolders(false)
+  }
+})
 
 // --- Data mapping ---
 
@@ -311,10 +318,9 @@ useDeleteShortcut({
         data-notes-folders-tree
         class="h-full min-h-0"
       >
-        <ContextMenu.ContextMenu>
+        <ContextMenu.ContextMenu v-if="treeData.length">
           <ContextMenu.ContextMenuTrigger as-child>
             <UiTree
-              v-if="treeData.length"
               virtual
               :active-id="selectedIds.length === 1 ? selectedIds[0] : undefined"
               :model-value="treeData"
@@ -353,16 +359,16 @@ useDeleteShortcut({
               </template>
             </UiTree>
           </ContextMenu.ContextMenuTrigger>
-          <UiEmptyPlaceholder
-            v-if="!treeData.length"
-            :text="i18n.t('placeholder.emptyFoldersList')"
-          />
           <NotesSidebarFolderContextMenu
             :context-node="contextNode"
             :editable-id="editableId"
             @update:editable-id="editableId = $event"
           />
         </ContextMenu.ContextMenu>
+        <UiEmptyPlaceholder
+          v-else
+          :text="i18n.t('placeholder.emptyFoldersList')"
+        />
       </div>
     </div>
     <div

@@ -973,6 +973,13 @@ describe('notes storage validations', () => {
           })
           .map(note => note.id),
       ).toEqual([done.id])
+      expect(
+        storage
+          .getNotes({
+            propertyTypeNot: 'task',
+          })
+          .map(note => note.id),
+      ).toEqual([regular.id])
       expect(storage.getNotes({}).map(note => note.id)).toContain(regular.id)
     }
     finally {

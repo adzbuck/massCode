@@ -1687,9 +1687,13 @@ async function openNoteInternal(note: NoteResult) {
   notesApp.highlightedFolderIds.value.clear()
   notesApp.highlightedTagId.value = undefined
 
+  const isTask = note.properties?.type === 'task'
   const query = note.folder?.id
     ? { folderId: note.folder.id, isDeleted: note.isDeleted }
-    : { isDeleted: note.isDeleted }
+    : {
+        isDeleted: note.isDeleted,
+        ...(isTask ? { propertyType: 'task' } : { propertyTypeNot: 'task' }),
+      }
 
   if (note.folder?.id) {
     notesApp.notesState.folderId = note.folder.id
@@ -1698,8 +1702,12 @@ async function openNoteInternal(note: NoteResult) {
   else {
     notesApp.notesState.folderId = undefined
     notesApp.notesState.libraryFilter = note.isDeleted
-      ? LibraryFilter.Trash
-      : LibraryFilter.All
+      ? isTask
+        ? LibraryFilter.TasksTrash
+        : LibraryFilter.Trash
+      : isTask
+        ? LibraryFilter.Tasks
+        : LibraryFilter.All
   }
 
   await notesData.getNotes(query)

@@ -59,7 +59,9 @@ const isViewingTasks = computed(
   () =>
     !notesState.folderId
     && !notesState.tagId
-    && notesState.libraryFilter === LibraryFilter.Tasks,
+    && (notesState.libraryFilter === LibraryFilter.Tasks
+      || notesState.libraryFilter === LibraryFilter.TasksInbox
+      || notesState.libraryFilter === LibraryFilter.TasksFavorites),
 )
 
 const isTasksKanbanActive = computed(

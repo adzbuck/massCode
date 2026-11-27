@@ -254,6 +254,7 @@ interface EmptyTrashInput<
   TStateIndex extends EntityIndexLike,
   TRuntimeEntity extends DeletableEntityLike,
 > {
+  predicate?: (entity: TRuntimeEntity) => boolean
   rootPath: string
   runtimeEntities: TRuntimeEntity[]
   stateEntities: TStateIndex[]
@@ -266,7 +267,8 @@ export function emptyEntityTrashFromStateAndDisk<
   input: EmptyTrashInput<TStateIndex, TRuntimeEntity>,
 ): { deletedCount: number } {
   const deletedEntities = input.runtimeEntities.filter(
-    entity => entity.isDeleted === 1,
+    entity =>
+      entity.isDeleted === 1 && (!input.predicate || input.predicate(entity)),
   )
 
   if (!deletedEntities.length) {

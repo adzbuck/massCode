@@ -479,7 +479,10 @@ describe('useNotes', () => {
     await context.useNotes().duplicateNote(1)
 
     expect(context.notesState.libraryFilter).toBe('all')
-    expect(context.getNotes).toHaveBeenLastCalledWith({ isDeleted: 0 })
+    expect(context.getNotes).toHaveBeenLastCalledWith({
+      isDeleted: 0,
+      propertyTypeNot: 'task',
+    })
   })
 
   it('combines search with the selected tag context', async () => {
@@ -656,10 +659,57 @@ describe('useNotes', () => {
 
     await context.useNotes().emptyTrash()
 
-    expect(context.deleteNotesTrash).toHaveBeenCalledOnce()
-    expect(context.getNotes).toHaveBeenCalledWith({ isDeleted: 1 })
+    expect(context.deleteNotesTrash).toHaveBeenCalledWith({
+      propertyTypeNot: 'task',
+    })
+    expect(context.getNotes).toHaveBeenCalledWith({
+      isDeleted: 1,
+      propertyTypeNot: 'task',
+    })
     expect(context.notesState.noteId).toBeUndefined()
     expect(context.selectedNoteIds.value).toEqual([])
+  })
+
+  it('parses task status and due tokens from searchQuery', async () => {
+    const context = await setup({
+      isSearch: true,
+      libraryFilter: 'inbox',
+      searchQuery: 'status:inProgress due:today release',
+    })
+
+    await context.useNotes().getNotes()
+
+    expect(context.getNotes).toHaveBeenCalledWith({
+      isInbox: 1,
+      propertyDue: 'today',
+      propertyStatus: 'inProgress',
+      propertyStatusNot: 'done',
+      propertyType: 'task',
+      search: 'release',
+    })
+  })
+
+  it('queries tasksInbox, tasksFavorites, and tasksTrash filters strictly for tasks', async () => {
+    const inboxCtx = await setup({ libraryFilter: 'tasksInbox' })
+    await inboxCtx.useNotes().getNotes()
+    expect(inboxCtx.getNotes).toHaveBeenCalledWith({
+      isInbox: 1,
+      propertyType: 'task',
+    })
+
+    const favCtx = await setup({ libraryFilter: 'tasksFavorites' })
+    await favCtx.useNotes().getNotes()
+    expect(favCtx.getNotes).toHaveBeenCalledWith({
+      isFavorites: 1,
+      propertyType: 'task',
+    })
+
+    const trashCtx = await setup({ libraryFilter: 'tasksTrash' })
+    await trashCtx.useNotes().getNotes()
+    expect(trashCtx.getNotes).toHaveBeenCalledWith({
+      isDeleted: 1,
+      propertyType: 'task',
+    })
   })
 })
 

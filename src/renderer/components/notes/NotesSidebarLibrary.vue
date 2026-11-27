@@ -3,28 +3,20 @@ import * as ContextMenu from '@/components/ui/shadcn/context-menu'
 import { useNotes, useNotesApp } from '@/composables'
 import { useNotesWorkspaceNavigation } from '@/composables/spaces/notes/useNotesWorkspaceNavigation'
 import { LibraryFilter } from '@/composables/types'
-import { i18n, store } from '@/electron'
+import { i18n } from '@/electron'
 import { RouterName } from '@/router'
 import { onClickOutside } from '@vueuse/core'
 import {
   Archive,
-  CalendarCheck,
-  CalendarClock,
-  CheckCircle2,
-  ChevronRight,
-  Circle,
-  CircleAlert,
-  CircleDot,
   Inbox,
-  ListTodo,
   Star,
   Trash,
   Trash2,
 } from 'lucide-vue-next'
 import { useRoute } from 'vue-router'
 
-const { notesState } = useNotesApp()
-const { emptyTrash, cleanupCompletedTasks } = useNotes()
+const { notesCreateKind, notesState } = useNotesApp()
+const { emptyTrash } = useNotes()
 const { openNotesLibrary } = useNotesWorkspaceNavigation()
 const route = useRoute()
 
@@ -40,63 +32,11 @@ const libraryItems = [
     name: i18n.t('spaces.notes.allNotes'),
     icon: Archive,
   },
-  {
-    id: LibraryFilter.Tasks,
-    name: i18n.t('notes.tasks.title'),
-    icon: ListTodo,
-  },
-  {
-    id: LibraryFilter.Today,
-    name: i18n.t('notes.tasks.today'),
-    icon: CalendarCheck,
-    isNested: true,
-  },
-  {
-    id: LibraryFilter.Upcoming,
-    name: i18n.t('notes.tasks.upcoming'),
-    icon: CalendarClock,
-    isNested: true,
-  },
-  {
-    id: LibraryFilter.Todo,
-    name: i18n.t('notes.tasks.status.todo'),
-    icon: Circle,
-    isNested: true,
-  },
-  {
-    id: LibraryFilter.InProgress,
-    name: i18n.t('notes.tasks.status.inProgress'),
-    icon: CircleDot,
-    isNested: true,
-  },
-  {
-    id: LibraryFilter.Blocked,
-    name: i18n.t('notes.tasks.status.blocked'),
-    icon: CircleAlert,
-    isNested: true,
-  },
-  {
-    id: LibraryFilter.Completed,
-    name: i18n.t('notes.tasks.completed'),
-    icon: CheckCircle2,
-    isNested: true,
-  },
   { id: LibraryFilter.Trash, name: i18n.t('common.trash'), icon: Trash },
 ]
 
 const focusedItemId = ref<string>()
 const itemRef = ref<HTMLElement>()
-const isTasksExpanded = ref(
-  store.app.get<boolean>('notes.layout.tasksExpanded') ?? true,
-)
-
-watch(isTasksExpanded, (value) => {
-  store.app.set('notes.layout.tasksExpanded', value)
-})
-
-const visibleLibraryItems = computed(() =>
-  libraryItems.filter(item => !item.isNested || isTasksExpanded.value),
-)
 
 function isItemSelected(item: (typeof libraryItems)[number]) {
   return (
@@ -106,6 +46,7 @@ function isItemSelected(item: (typeof libraryItems)[number]) {
 
 async function onItemClick(item: (typeof libraryItems)[number]) {
   focusedItemId.value = item.id
+  notesCreateKind.value = 'note'
   await openNotesLibrary(item.id)
 }
 
@@ -124,7 +65,7 @@ onClickOutside(itemRef, () => {
       <ContextMenu.ContextMenuTrigger>
         <div class="px-1">
           <div
-            v-for="item in visibleLibraryItems"
+            v-for="item in libraryItems"
             :key="item.id"
             data-sidebar-item
             :data-selected="isItemSelected(item) ? 'true' : undefined"
@@ -136,26 +77,7 @@ onClickOutside(itemRef, () => {
             }"
             @click="onItemClick(item)"
           >
-            <div
-              class="flex items-center"
-              :class="
-                item.isNested
-                  ? 'ml-9'
-                  : item.id === LibraryFilter.Tasks
-                    ? ''
-                    : 'ml-5.5'
-              "
-            >
-              <div
-                v-if="item.id === LibraryFilter.Tasks"
-                class="mx-0.75 flex h-4 w-4 shrink-0 items-center justify-center"
-                @click.stop="isTasksExpanded = !isTasksExpanded"
-              >
-                <ChevronRight
-                  class="h-3 w-3"
-                  :class="{ 'rotate-90': isTasksExpanded }"
-                />
-              </div>
+            <div class="ml-5.5 flex items-center">
               <component
                 :is="item.icon"
                 class="mr-0.5 h-4 w-4 shrink-0"
@@ -168,7 +90,7 @@ onClickOutside(itemRef, () => {
                 data-notes-sidebar-empty-trash
                 :tooltip="i18n.t('action.delete.trash')"
                 class="mr-0.5 h-5 w-5 opacity-0 group-hover:opacity-100 group-data-[selected=true]:opacity-100 group-data-[focused=true]:text-inherit group-data-[focused=true]:opacity-100 [&_svg:not([class*='size-'])]:size-3.5"
-                @click.stop="emptyTrash"
+                @click.stop="emptyTrash({ propertyTypeNot: 'task' })"
               >
                 <Trash2 class="size-3.5" />
               </UiActionButton>
@@ -177,11 +99,7 @@ onClickOutside(itemRef, () => {
         </div>
       </ContextMenu.ContextMenuTrigger>
       <ContextMenu.ContextMenuContent>
-        <ContextMenu.ContextMenuItem @click="cleanupCompletedTasks()">
-          {{ i18n.t("notes.tasks.cleanupCompleted") }}
-        </ContextMenu.ContextMenuItem>
-        <ContextMenu.ContextMenuSeparator />
-        <ContextMenu.ContextMenuItem @click="emptyTrash">
+        <ContextMenu.ContextMenuItem @click="emptyTrash({ propertyTypeNot: 'task' })">
           {{ i18n.t("action.delete.trash") }}
         </ContextMenu.ContextMenuItem>
       </ContextMenu.ContextMenuContent>

@@ -157,11 +157,11 @@ export interface AppStore {
       inspectorOpen?: boolean
       inspectorWidth?: number
       libraryOpen?: boolean
+      tasksOpen?: boolean
       foldersOpen?: boolean
       tagsOpen?: boolean
       mode: SpaceLayoutMode
       tagsListHeight: number
-      tasksExpanded?: boolean
       threePanel?: number[]
       twoPanel?: number
     }

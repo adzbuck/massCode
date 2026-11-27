@@ -313,9 +313,9 @@ app
   )
   .delete(
     '/trash',
-    ({ status }) => {
+    ({ query, status }) => {
       const storage = useNotesStorage()
-      const { deletedCount } = storage.notes.emptyTrash()
+      const { deletedCount } = storage.notes.emptyTrash(query)
 
       if (!deletedCount) {
         return status(404, { message: 'No notes in trash' })
@@ -326,6 +326,7 @@ app
       }
     },
     {
+      query: 'notesTrashQuery',
       detail: {
         tags: ['Notes'],
       },

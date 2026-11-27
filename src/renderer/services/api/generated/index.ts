@@ -224,23 +224,12 @@ export interface VaultDoctorResponse {
         path: string;
         size: number;
       };
-      kind:
-        | "conflict"
-        | "environment"
-        | "file"
-        | "folder"
-        | "math-sheet"
-        | "note"
-        | "snippet";
+      kind: "conflict" | "environment" | "file" | "folder" | "math-sheet" | "note" | "snippet";
       path: string;
       space: "code" | "notes" | "http" | "math";
       status: "applied" | "blocked" | "needs-decision" | "pending" | "skipped";
     }[];
-    reason:
-      | "conflicted-copy"
-      | "duplicate-id"
-      | "invalid-frontmatter"
-      | "merge-markers";
+    reason: "conflicted-copy" | "duplicate-id" | "invalid-frontmatter" | "merge-markers";
   }[];
   items: {
     action:
@@ -258,14 +247,7 @@ export interface VaultDoctorResponse {
       path: string;
       size: number;
     };
-    kind:
-      | "conflict"
-      | "environment"
-      | "file"
-      | "folder"
-      | "math-sheet"
-      | "note"
-      | "snippet";
+    kind: "conflict" | "environment" | "file" | "folder" | "math-sheet" | "note" | "snippet";
     path: string;
     space: "code" | "notes" | "http" | "math";
     status: "applied" | "blocked" | "needs-decision" | "pending" | "skipped";
@@ -602,6 +584,33 @@ export type HttpFoldersResponse = {
       password?: string;
     };
     runtime: {
+      transport?: {
+        /**
+         * @min 0
+         * @multipleOf 1
+         * @max 2147483647
+         */
+        timeoutMs?: number;
+        /**
+         * @min 0
+         * @multipleOf 1
+         * @max 9007199254740991
+         */
+        maxResponseBytes?: number;
+        protocolVersion?: "http1" | "auto" | "http2";
+        encodeUrl?: boolean;
+        followOriginalHttpMethod?: boolean;
+        followAuthorizationHeader?: boolean;
+        removeRefererHeaderOnRedirect?: boolean;
+        followRedirects?: boolean;
+        /**
+         * @min 0
+         * @multipleOf 1
+         * @max 100
+         */
+        maxRedirects?: number;
+        skipCertificateVerification?: boolean;
+      };
       scripts?: {
         /** @maxLength 65536 */
         preRequest: string;
@@ -644,40 +653,8 @@ export type HttpFoldersResponse = {
           | "isArray"
           | "isObject"
           | "isNull";
-        expected?:
-          | string
-          | number
-          | boolean
-          | null
-          | (string | number | boolean | null)[];
+        expected?: string | number | boolean | null | (string | number | boolean | null)[];
       }[];
-      transport?: {
-        /**
-         * @min 0
-         * @multipleOf 1
-         * @max 2147483647
-         */
-        timeoutMs?: number;
-        /**
-         * @min 0
-         * @multipleOf 1
-         * @max 9007199254740991
-         */
-        maxResponseBytes?: number;
-        protocolVersion?: "http1" | "auto" | "http2";
-        encodeUrl?: boolean;
-        followOriginalHttpMethod?: boolean;
-        followAuthorizationHeader?: boolean;
-        removeRefererHeaderOnRedirect?: boolean;
-        followRedirects?: boolean;
-        /**
-         * @min 0
-         * @multipleOf 1
-         * @max 100
-         */
-        maxRedirects?: number;
-        skipCertificateVerification?: boolean;
-      };
     };
   } | null;
   collectionConfigState?: "ready" | "invalid";
@@ -722,6 +699,33 @@ export type HttpFoldersTreeResponse = {
       password?: string;
     };
     runtime: {
+      transport?: {
+        /**
+         * @min 0
+         * @multipleOf 1
+         * @max 2147483647
+         */
+        timeoutMs?: number;
+        /**
+         * @min 0
+         * @multipleOf 1
+         * @max 9007199254740991
+         */
+        maxResponseBytes?: number;
+        protocolVersion?: "http1" | "auto" | "http2";
+        encodeUrl?: boolean;
+        followOriginalHttpMethod?: boolean;
+        followAuthorizationHeader?: boolean;
+        removeRefererHeaderOnRedirect?: boolean;
+        followRedirects?: boolean;
+        /**
+         * @min 0
+         * @multipleOf 1
+         * @max 100
+         */
+        maxRedirects?: number;
+        skipCertificateVerification?: boolean;
+      };
       scripts?: {
         /** @maxLength 65536 */
         preRequest: string;
@@ -764,40 +768,8 @@ export type HttpFoldersTreeResponse = {
           | "isArray"
           | "isObject"
           | "isNull";
-        expected?:
-          | string
-          | number
-          | boolean
-          | null
-          | (string | number | boolean | null)[];
+        expected?: string | number | boolean | null | (string | number | boolean | null)[];
       }[];
-      transport?: {
-        /**
-         * @min 0
-         * @multipleOf 1
-         * @max 2147483647
-         */
-        timeoutMs?: number;
-        /**
-         * @min 0
-         * @multipleOf 1
-         * @max 9007199254740991
-         */
-        maxResponseBytes?: number;
-        protocolVersion?: "http1" | "auto" | "http2";
-        encodeUrl?: boolean;
-        followOriginalHttpMethod?: boolean;
-        followAuthorizationHeader?: boolean;
-        removeRefererHeaderOnRedirect?: boolean;
-        followRedirects?: boolean;
-        /**
-         * @min 0
-         * @multipleOf 1
-         * @max 100
-         */
-        maxRedirects?: number;
-        skipCertificateVerification?: boolean;
-      };
     };
   } | null;
   collectionConfigState?: "ready" | "invalid";
@@ -843,6 +815,33 @@ export interface HttpFoldersUpdate {
       password?: string;
     };
     runtime: {
+      transport?: {
+        /**
+         * @min 0
+         * @multipleOf 1
+         * @max 2147483647
+         */
+        timeoutMs?: number;
+        /**
+         * @min 0
+         * @multipleOf 1
+         * @max 9007199254740991
+         */
+        maxResponseBytes?: number;
+        protocolVersion?: "http1" | "auto" | "http2";
+        encodeUrl?: boolean;
+        followOriginalHttpMethod?: boolean;
+        followAuthorizationHeader?: boolean;
+        removeRefererHeaderOnRedirect?: boolean;
+        followRedirects?: boolean;
+        /**
+         * @min 0
+         * @multipleOf 1
+         * @max 100
+         */
+        maxRedirects?: number;
+        skipCertificateVerification?: boolean;
+      };
       scripts?: {
         /** @maxLength 65536 */
         preRequest: string;
@@ -885,40 +884,8 @@ export interface HttpFoldersUpdate {
           | "isArray"
           | "isObject"
           | "isNull";
-        expected?:
-          | string
-          | number
-          | boolean
-          | null
-          | (string | number | boolean | null)[];
+        expected?: string | number | boolean | null | (string | number | boolean | null)[];
       }[];
-      transport?: {
-        /**
-         * @min 0
-         * @multipleOf 1
-         * @max 2147483647
-         */
-        timeoutMs?: number;
-        /**
-         * @min 0
-         * @multipleOf 1
-         * @max 9007199254740991
-         */
-        maxResponseBytes?: number;
-        protocolVersion?: "http1" | "auto" | "http2";
-        encodeUrl?: boolean;
-        followOriginalHttpMethod?: boolean;
-        followAuthorizationHeader?: boolean;
-        removeRefererHeaderOnRedirect?: boolean;
-        followRedirects?: boolean;
-        /**
-         * @min 0
-         * @multipleOf 1
-         * @max 100
-         */
-        maxRedirects?: number;
-        skipCertificateVerification?: boolean;
-      };
     };
   };
   name?: string;
@@ -933,6 +900,33 @@ export interface HttpFoldersUpdate {
 }
 
 export interface HttpRuntime {
+  transport?: {
+    /**
+     * @min 0
+     * @multipleOf 1
+     * @max 2147483647
+     */
+    timeoutMs?: number;
+    /**
+     * @min 0
+     * @multipleOf 1
+     * @max 9007199254740991
+     */
+    maxResponseBytes?: number;
+    protocolVersion?: "http1" | "auto" | "http2";
+    encodeUrl?: boolean;
+    followOriginalHttpMethod?: boolean;
+    followAuthorizationHeader?: boolean;
+    removeRefererHeaderOnRedirect?: boolean;
+    followRedirects?: boolean;
+    /**
+     * @min 0
+     * @multipleOf 1
+     * @max 100
+     */
+    maxRedirects?: number;
+    skipCertificateVerification?: boolean;
+  };
   scripts?: {
     /** @maxLength 65536 */
     preRequest: string;
@@ -975,44 +969,39 @@ export interface HttpRuntime {
       | "isArray"
       | "isObject"
       | "isNull";
-    expected?:
-      | string
-      | number
-      | boolean
-      | null
-      | (string | number | boolean | null)[];
+    expected?: string | number | boolean | null | (string | number | boolean | null)[];
   }[];
-  transport?: {
-    /**
-     * @min 0
-     * @multipleOf 1
-     * @max 2147483647
-     */
-    timeoutMs?: number;
-    /**
-     * @min 0
-     * @multipleOf 1
-     * @max 9007199254740991
-     */
-    maxResponseBytes?: number;
-    protocolVersion?: "http1" | "auto" | "http2";
-    encodeUrl?: boolean;
-    followOriginalHttpMethod?: boolean;
-    followAuthorizationHeader?: boolean;
-    removeRefererHeaderOnRedirect?: boolean;
-    followRedirects?: boolean;
-    /**
-     * @min 0
-     * @multipleOf 1
-     * @max 100
-     */
-    maxRedirects?: number;
-    skipCertificateVerification?: boolean;
-  };
 }
 
 export interface HttpRuntimeSave {
   runtime: {
+    transport?: {
+      /**
+       * @min 0
+       * @multipleOf 1
+       * @max 2147483647
+       */
+      timeoutMs?: number;
+      /**
+       * @min 0
+       * @multipleOf 1
+       * @max 9007199254740991
+       */
+      maxResponseBytes?: number;
+      protocolVersion?: "http1" | "auto" | "http2";
+      encodeUrl?: boolean;
+      followOriginalHttpMethod?: boolean;
+      followAuthorizationHeader?: boolean;
+      removeRefererHeaderOnRedirect?: boolean;
+      followRedirects?: boolean;
+      /**
+       * @min 0
+       * @multipleOf 1
+       * @max 100
+       */
+      maxRedirects?: number;
+      skipCertificateVerification?: boolean;
+    };
     scripts?: {
       /** @maxLength 65536 */
       preRequest: string;
@@ -1055,40 +1044,8 @@ export interface HttpRuntimeSave {
         | "isArray"
         | "isObject"
         | "isNull";
-      expected?:
-        | string
-        | number
-        | boolean
-        | null
-        | (string | number | boolean | null)[];
+      expected?: string | number | boolean | null | (string | number | boolean | null)[];
     }[];
-    transport?: {
-      /**
-       * @min 0
-       * @multipleOf 1
-       * @max 2147483647
-       */
-      timeoutMs?: number;
-      /**
-       * @min 0
-       * @multipleOf 1
-       * @max 9007199254740991
-       */
-      maxResponseBytes?: number;
-      protocolVersion?: "http1" | "auto" | "http2";
-      encodeUrl?: boolean;
-      followOriginalHttpMethod?: boolean;
-      followAuthorizationHeader?: boolean;
-      removeRefererHeaderOnRedirect?: boolean;
-      followRedirects?: boolean;
-      /**
-       * @min 0
-       * @multipleOf 1
-       * @max 100
-       */
-      maxRedirects?: number;
-      skipCertificateVerification?: boolean;
-    };
   };
   expectedRevision: string;
 }
@@ -1101,6 +1058,33 @@ export interface HttpRequestItemResponse {
   contentRevision: string | null;
   runtimeRevision: string | null;
   runtime: {
+    transport?: {
+      /**
+       * @min 0
+       * @multipleOf 1
+       * @max 2147483647
+       */
+      timeoutMs?: number;
+      /**
+       * @min 0
+       * @multipleOf 1
+       * @max 9007199254740991
+       */
+      maxResponseBytes?: number;
+      protocolVersion?: "http1" | "auto" | "http2";
+      encodeUrl?: boolean;
+      followOriginalHttpMethod?: boolean;
+      followAuthorizationHeader?: boolean;
+      removeRefererHeaderOnRedirect?: boolean;
+      followRedirects?: boolean;
+      /**
+       * @min 0
+       * @multipleOf 1
+       * @max 100
+       */
+      maxRedirects?: number;
+      skipCertificateVerification?: boolean;
+    };
     scripts?: {
       /** @maxLength 65536 */
       preRequest: string;
@@ -1143,40 +1127,8 @@ export interface HttpRequestItemResponse {
         | "isArray"
         | "isObject"
         | "isNull";
-      expected?:
-        | string
-        | number
-        | boolean
-        | null
-        | (string | number | boolean | null)[];
+      expected?: string | number | boolean | null | (string | number | boolean | null)[];
     }[];
-    transport?: {
-      /**
-       * @min 0
-       * @multipleOf 1
-       * @max 2147483647
-       */
-      timeoutMs?: number;
-      /**
-       * @min 0
-       * @multipleOf 1
-       * @max 9007199254740991
-       */
-      maxResponseBytes?: number;
-      protocolVersion?: "http1" | "auto" | "http2";
-      encodeUrl?: boolean;
-      followOriginalHttpMethod?: boolean;
-      followAuthorizationHeader?: boolean;
-      removeRefererHeaderOnRedirect?: boolean;
-      followRedirects?: boolean;
-      /**
-       * @min 0
-       * @multipleOf 1
-       * @max 100
-       */
-      maxRedirects?: number;
-      skipCertificateVerification?: boolean;
-    };
   } | null;
   runtimeState: "ready" | "pending" | "invalid" | "unsupported";
   id: number;
@@ -1197,14 +1149,7 @@ export interface HttpRequestItemResponse {
     description?: string;
     enabled?: boolean;
   }[];
-  bodyType:
-    | "none"
-    | "json"
-    | "graphql"
-    | "text"
-    | "form-urlencoded"
-    | "multipart"
-    | "binary";
+  bodyType: "none" | "json" | "graphql" | "text" | "form-urlencoded" | "multipart" | "binary";
   body: string | null;
   formData: {
     enabled?: boolean;
@@ -1285,14 +1230,7 @@ export type HttpRequestsResponse = {
     description?: string;
     enabled?: boolean;
   }[];
-  bodyType:
-    | "none"
-    | "json"
-    | "graphql"
-    | "text"
-    | "form-urlencoded"
-    | "multipart"
-    | "binary";
+  bodyType: "none" | "json" | "graphql" | "text" | "form-urlencoded" | "multipart" | "binary";
   formData: {
     enabled?: boolean;
     description?: string;
@@ -1347,14 +1285,7 @@ export interface HttpRequestsUpdate {
     description?: string;
     enabled?: boolean;
   }[];
-  bodyType?:
-    | "none"
-    | "json"
-    | "graphql"
-    | "text"
-    | "form-urlencoded"
-    | "multipart"
-    | "binary";
+  bodyType?: "none" | "json" | "graphql" | "text" | "form-urlencoded" | "multipart" | "binary";
   body?: string | null;
   formData?: {
     enabled?: boolean;
@@ -1503,12 +1434,7 @@ export interface ImportApplyInput {
     name: string;
     relativePath?: string;
   }[];
-  source?:
-    | "github-gists"
-    | "obsidian"
-    | "raycast-snippets"
-    | "snippetslab"
-    | "vscode-snippets";
+  source?: "github-gists" | "obsidian" | "raycast-snippets" | "snippetslab" | "vscode-snippets";
   space?: "code" | "notes";
   url?: string;
 }
@@ -1519,12 +1445,7 @@ export interface ImportApplyResponse {
   folders: number;
   notes: number;
   snippets: number;
-  source:
-    | "github-gists"
-    | "obsidian"
-    | "raycast-snippets"
-    | "snippetslab"
-    | "vscode-snippets";
+  source: "github-gists" | "obsidian" | "raycast-snippets" | "snippetslab" | "vscode-snippets";
   tags: number;
   warnings: {
     code: string;
@@ -1540,12 +1461,7 @@ export interface ImportPreviewInput {
     name: string;
     relativePath?: string;
   }[];
-  source?:
-    | "github-gists"
-    | "obsidian"
-    | "raycast-snippets"
-    | "snippetslab"
-    | "vscode-snippets";
+  source?: "github-gists" | "obsidian" | "raycast-snippets" | "snippetslab" | "vscode-snippets";
   space?: "code" | "notes";
   url?: string;
 }
@@ -1561,12 +1477,7 @@ export interface ImportPreviewResponse {
   }[];
   notes: number;
   snippets: number;
-  source:
-    | "github-gists"
-    | "obsidian"
-    | "raycast-snippets"
-    | "snippetslab"
-    | "vscode-snippets";
+  source: "github-gists" | "obsidian" | "raycast-snippets" | "snippetslab" | "vscode-snippets";
   tags: string[];
   warnings: {
     code: string;
@@ -1597,22 +1508,16 @@ export interface FullRequestParams extends Omit<RequestInit, "body"> {
   cancelToken?: CancelToken;
 }
 
-export type RequestParams = Omit<
-  FullRequestParams,
-  "body" | "method" | "query" | "path"
->;
+export type RequestParams = Omit<FullRequestParams, "body" | "method" | "query" | "path">;
 
 export interface ApiConfig<SecurityDataType = unknown> {
   baseUrl?: string;
   baseApiParams?: Omit<RequestParams, "baseUrl" | "cancelToken" | "signal">;
-  securityWorker?: (
-    securityData: SecurityDataType | null,
-  ) => Promise<RequestParams | void> | RequestParams | void;
+  securityWorker?: (securityData: SecurityDataType | null) => Promise<RequestParams | void> | RequestParams | void;
   customFetch?: typeof fetch;
 }
 
-export interface HttpResponse<D extends unknown, E extends unknown = unknown>
-  extends Response {
+export interface HttpResponse<D extends unknown, E extends unknown = unknown> extends Response {
   data: D;
   error: E;
 }
@@ -1631,8 +1536,7 @@ export class HttpClient<SecurityDataType = unknown> {
   private securityData: SecurityDataType | null = null;
   private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"];
   private abortControllers = new Map<CancelToken, AbortController>();
-  private customFetch = (...fetchParams: Parameters<typeof fetch>) =>
-    fetch(...fetchParams);
+  private customFetch = (...fetchParams: Parameters<typeof fetch>) => fetch(...fetchParams);
 
   private baseApiParams: RequestParams = {
     credentials: "same-origin",
@@ -1665,15 +1569,9 @@ export class HttpClient<SecurityDataType = unknown> {
 
   protected toQueryString(rawQuery?: QueryParamsType): string {
     const query = rawQuery || {};
-    const keys = Object.keys(query).filter(
-      (key) => "undefined" !== typeof query[key],
-    );
+    const keys = Object.keys(query).filter((key) => "undefined" !== typeof query[key]);
     return keys
-      .map((key) =>
-        Array.isArray(query[key])
-          ? this.addArrayQueryParam(query, key)
-          : this.addQueryParam(query, key),
-      )
+      .map((key) => (Array.isArray(query[key]) ? this.addArrayQueryParam(query, key) : this.addQueryParam(query, key)))
       .join("&");
   }
 
@@ -1684,13 +1582,8 @@ export class HttpClient<SecurityDataType = unknown> {
 
   private contentFormatters: Record<ContentType, (input: any) => any> = {
     [ContentType.Json]: (input: any) =>
-      input !== null && (typeof input === "object" || typeof input === "string")
-        ? JSON.stringify(input)
-        : input,
-    [ContentType.Text]: (input: any) =>
-      input !== null && typeof input !== "string"
-        ? JSON.stringify(input)
-        : input,
+      input !== null && (typeof input === "object" || typeof input === "string") ? JSON.stringify(input) : input,
+    [ContentType.Text]: (input: any) => (input !== null && typeof input !== "string" ? JSON.stringify(input) : input),
     [ContentType.FormData]: (input: any) =>
       Object.keys(input || {}).reduce((formData, key) => {
         const property = input[key];
@@ -1707,10 +1600,7 @@ export class HttpClient<SecurityDataType = unknown> {
     [ContentType.UrlEncoded]: (input: any) => this.toQueryString(input),
   };
 
-  protected mergeRequestParams(
-    params1: RequestParams,
-    params2?: RequestParams,
-  ): RequestParams {
+  protected mergeRequestParams(params1: RequestParams, params2?: RequestParams): RequestParams {
     return {
       ...this.baseApiParams,
       ...params1,
@@ -1723,9 +1613,7 @@ export class HttpClient<SecurityDataType = unknown> {
     };
   }
 
-  protected createAbortSignal = (
-    cancelToken: CancelToken,
-  ): AbortSignal | undefined => {
+  protected createAbortSignal = (cancelToken: CancelToken): AbortSignal | undefined => {
     if (this.abortControllers.has(cancelToken)) {
       const abortController = this.abortControllers.get(cancelToken);
       if (abortController) {
@@ -1769,26 +1657,15 @@ export class HttpClient<SecurityDataType = unknown> {
     const payloadFormatter = this.contentFormatters[type || ContentType.Json];
     const responseFormat = format || requestParams.format;
 
-    return this.customFetch(
-      `${baseUrl || this.baseUrl || ""}${path}${queryString ? `?${queryString}` : ""}`,
-      {
-        ...requestParams,
-        headers: {
-          ...(requestParams.headers || {}),
-          ...(type && type !== ContentType.FormData
-            ? { "Content-Type": type }
-            : {}),
-        },
-        signal:
-          (cancelToken
-            ? this.createAbortSignal(cancelToken)
-            : requestParams.signal) || null,
-        body:
-          typeof body === "undefined" || body === null
-            ? null
-            : payloadFormatter(body),
+    return this.customFetch(`${baseUrl || this.baseUrl || ""}${path}${queryString ? `?${queryString}` : ""}`, {
+      ...requestParams,
+      headers: {
+        ...(requestParams.headers || {}),
+        ...(type && type !== ContentType.FormData ? { "Content-Type": type } : {}),
       },
-    ).then(async (response) => {
+      signal: (cancelToken ? this.createAbortSignal(cancelToken) : requestParams.signal) || null,
+      body: typeof body === "undefined" || body === null ? null : payloadFormatter(body),
+    }).then(async (response) => {
       const r = response.clone() as HttpResponse<T, E>;
       r.data = null as unknown as T;
       r.error = null as unknown as E;
@@ -1821,13 +1698,11 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title massCode API
- * @version 5.10.0
+ * @version 6.4.0
  *
  * Development documentation
  */
-export class Api<
-  SecurityDataType extends unknown,
-> extends HttpClient<SecurityDataType> {
+export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
   captures = {
     /**
      * No description
@@ -1961,11 +1836,7 @@ export class Api<
      * @name PatchSnippetsById
      * @request PATCH:/snippets/{id}
      */
-    patchSnippetsById: (
-      id: string,
-      data: SnippetsUpdate,
-      params: RequestParams = {},
-    ) =>
+    patchSnippetsById: (id: string, data: SnippetsUpdate, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/snippets/${id}`,
         method: "PATCH",
@@ -1995,11 +1866,7 @@ export class Api<
      * @name PostSnippetsByIdContents
      * @request POST:/snippets/{id}/contents
      */
-    postSnippetsByIdContents: (
-      id: string,
-      data: SnippetContentsAdd,
-      params: RequestParams = {},
-    ) =>
+    postSnippetsByIdContents: (id: string, data: SnippetContentsAdd, params: RequestParams = {}) =>
       this.request<
         {
           id: number | bigint;
@@ -2021,11 +1888,7 @@ export class Api<
      * @name PatchSnippetsByIdContentsOrder
      * @request PATCH:/snippets/{id}/contents/order
      */
-    patchSnippetsByIdContentsOrder: (
-      id: string,
-      data: SnippetContentsOrder,
-      params: RequestParams = {},
-    ) =>
+    patchSnippetsByIdContentsOrder: (id: string, data: SnippetContentsOrder, params: RequestParams = {}) =>
       this.request<
         {
           message: string;
@@ -2070,11 +1933,7 @@ export class Api<
      * @name DeleteSnippetsByIdContentsByContentId
      * @request DELETE:/snippets/{id}/contents/{contentId}
      */
-    deleteSnippetsByIdContentsByContentId: (
-      id: string,
-      contentId: string,
-      params: RequestParams = {},
-    ) =>
+    deleteSnippetsByIdContentsByContentId: (id: string, contentId: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/snippets/${id}/contents/${contentId}`,
         method: "DELETE",
@@ -2088,11 +1947,7 @@ export class Api<
      * @name PostSnippetsByIdTagsByTagId
      * @request POST:/snippets/{id}/tags/{tagId}
      */
-    postSnippetsByIdTagsByTagId: (
-      id: string,
-      tagId: string,
-      params: RequestParams = {},
-    ) =>
+    postSnippetsByIdTagsByTagId: (id: string, tagId: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/snippets/${id}/tags/${tagId}`,
         method: "POST",
@@ -2106,11 +1961,7 @@ export class Api<
      * @name DeleteSnippetsByIdTagsByTagId
      * @request DELETE:/snippets/{id}/tags/{tagId}
      */
-    deleteSnippetsByIdTagsByTagId: (
-      id: string,
-      tagId: string,
-      params: RequestParams = {},
-    ) =>
+    deleteSnippetsByIdTagsByTagId: (id: string, tagId: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/snippets/${id}/tags/${tagId}`,
         method: "DELETE",
@@ -2191,11 +2042,7 @@ export class Api<
      * @name PatchFoldersById
      * @request PATCH:/folders/{id}
      */
-    patchFoldersById: (
-      id: string,
-      data: FoldersUpdate,
-      params: RequestParams = {},
-    ) =>
+    patchFoldersById: (id: string, data: FoldersUpdate, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/folders/${id}`,
         method: "PATCH",
@@ -2254,10 +2101,7 @@ export class Api<
      * @name PostSystemVaultDoctorPreview
      * @request POST:/system/vault-doctor/preview
      */
-    postSystemVaultDoctorPreview: (
-      data: VaultDoctorInput,
-      params: RequestParams = {},
-    ) =>
+    postSystemVaultDoctorPreview: (data: VaultDoctorInput, params: RequestParams = {}) =>
       this.request<VaultDoctorResponse, any>({
         path: `/system/vault-doctor/preview`,
         method: "POST",
@@ -2274,10 +2118,7 @@ export class Api<
      * @name PostSystemVaultDoctorApply
      * @request POST:/system/vault-doctor/apply
      */
-    postSystemVaultDoctorApply: (
-      data: VaultDoctorInput,
-      params: RequestParams = {},
-    ) =>
+    postSystemVaultDoctorApply: (data: VaultDoctorInput, params: RequestParams = {}) =>
       this.request<VaultDoctorResponse, any>({
         path: `/system/vault-doctor/apply`,
         method: "POST",
@@ -2483,11 +2324,7 @@ export class Api<
      * @name PatchNotesById
      * @request PATCH:/notes/{id}
      */
-    patchNotesById: (
-      id: string,
-      data: NotesUpdate,
-      params: RequestParams = {},
-    ) =>
+    patchNotesById: (id: string, data: NotesUpdate, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/notes/${id}`,
         method: "PATCH",
@@ -2517,11 +2354,7 @@ export class Api<
      * @name PatchNotesByIdContent
      * @request PATCH:/notes/{id}/content
      */
-    patchNotesByIdContent: (
-      id: string,
-      data: NotesContentUpdate,
-      params: RequestParams = {},
-    ) =>
+    patchNotesByIdContent: (id: string, data: NotesContentUpdate, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/notes/${id}/content`,
         method: "PATCH",
@@ -2537,11 +2370,7 @@ export class Api<
      * @name PatchNotesByIdProperties
      * @request PATCH:/notes/{id}/properties
      */
-    patchNotesByIdProperties: (
-      id: string,
-      data: NotePropertiesUpdate,
-      params: RequestParams = {},
-    ) =>
+    patchNotesByIdProperties: (id: string, data: NotePropertiesUpdate, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/notes/${id}/properties`,
         method: "PATCH",
@@ -2557,11 +2386,7 @@ export class Api<
      * @name PostNotesByIdTagsByTagId
      * @request POST:/notes/{id}/tags/{tagId}
      */
-    postNotesByIdTagsByTagId: (
-      id: string,
-      tagId: string,
-      params: RequestParams = {},
-    ) =>
+    postNotesByIdTagsByTagId: (id: string, tagId: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/notes/${id}/tags/${tagId}`,
         method: "POST",
@@ -2575,11 +2400,7 @@ export class Api<
      * @name DeleteNotesByIdTagsByTagId
      * @request DELETE:/notes/{id}/tags/{tagId}
      */
-    deleteNotesByIdTagsByTagId: (
-      id: string,
-      tagId: string,
-      params: RequestParams = {},
-    ) =>
+    deleteNotesByIdTagsByTagId: (id: string, tagId: string, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/notes/${id}/tags/${tagId}`,
         method: "DELETE",
@@ -2675,11 +2496,7 @@ export class Api<
      * @name PatchNoteFoldersById
      * @request PATCH:/note-folders/{id}
      */
-    patchNoteFoldersById: (
-      id: string,
-      data: NoteFoldersUpdate,
-      params: RequestParams = {},
-    ) =>
+    patchNoteFoldersById: (id: string, data: NoteFoldersUpdate, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/note-folders/${id}`,
         method: "PATCH",
@@ -2742,11 +2559,7 @@ export class Api<
      * @name PatchNoteTagsById
      * @request PATCH:/note-tags/{id}
      */
-    patchNoteTagsById: (
-      id: string,
-      data: NoteTagsUpdate,
-      params: RequestParams = {},
-    ) =>
+    patchNoteTagsById: (id: string, data: NoteTagsUpdate, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/note-tags/${id}`,
         method: "PATCH",
@@ -2777,10 +2590,7 @@ export class Api<
      * @name PostInternalLinksResolve
      * @request POST:/internal-links/resolve
      */
-    postInternalLinksResolve: (
-      data: InternalLinksResolveBody,
-      params: RequestParams = {},
-    ) =>
+    postInternalLinksResolve: (data: InternalLinksResolveBody, params: RequestParams = {}) =>
       this.request<InternalLinksResolveResponse, any>({
         path: `/internal-links/resolve`,
         method: "POST",
@@ -2850,11 +2660,7 @@ export class Api<
      * @name PatchHttpFoldersById
      * @request PATCH:/http-folders/{id}
      */
-    patchHttpFoldersById: (
-      id: string,
-      data: HttpFoldersUpdate,
-      params: RequestParams = {},
-    ) =>
+    patchHttpFoldersById: (id: string, data: HttpFoldersUpdate, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/http-folders/${id}`,
         method: "PATCH",
@@ -2971,11 +2777,7 @@ export class Api<
      * @name PatchHttpRequestsById
      * @request PATCH:/http-requests/{id}
      */
-    patchHttpRequestsById: (
-      id: string,
-      data: HttpRequestsUpdate,
-      params: RequestParams = {},
-    ) =>
+    patchHttpRequestsById: (id: string, data: HttpRequestsUpdate, params: RequestParams = {}) =>
       this.request<
         HttpRequestsUpdateResponse,
         {
@@ -3011,11 +2813,7 @@ export class Api<
      * @name PutHttpRequestsByIdRuntime
      * @request PUT:/http-requests/{id}/runtime
      */
-    putHttpRequestsByIdRuntime: (
-      id: string,
-      data: HttpRuntimeSave,
-      params: RequestParams = {},
-    ) =>
+    putHttpRequestsByIdRuntime: (id: string, data: HttpRuntimeSave, params: RequestParams = {}) =>
       this.request<
         HttpRuntimeSaveResponse,
         {
@@ -3067,10 +2865,7 @@ export class Api<
      * @name PostHttpEnvironments
      * @request POST:/http-environments/
      */
-    postHttpEnvironments: (
-      data: HttpEnvironmentsAdd,
-      params: RequestParams = {},
-    ) =>
+    postHttpEnvironments: (data: HttpEnvironmentsAdd, params: RequestParams = {}) =>
       this.request<
         {
           id: number | bigint;
@@ -3092,11 +2887,7 @@ export class Api<
      * @name PatchHttpEnvironmentsById
      * @request PATCH:/http-environments/{id}
      */
-    patchHttpEnvironmentsById: (
-      id: string,
-      data: HttpEnvironmentsUpdate,
-      params: RequestParams = {},
-    ) =>
+    patchHttpEnvironmentsById: (id: string, data: HttpEnvironmentsUpdate, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/http-environments/${id}`,
         method: "PATCH",
@@ -3126,10 +2917,7 @@ export class Api<
      * @name PostHttpEnvironmentsActive
      * @request POST:/http-environments/active
      */
-    postHttpEnvironmentsActive: (
-      data: HttpEnvironmentsSetActive,
-      params: RequestParams = {},
-    ) =>
+    postHttpEnvironmentsActive: (data: HttpEnvironmentsSetActive, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/http-environments/active`,
         method: "POST",
@@ -3176,10 +2964,7 @@ export class Api<
      * @name PostHttpImportPreview
      * @request POST:/http-import/preview
      */
-    postHttpImportPreview: (
-      data: HttpImportPreviewInput,
-      params: RequestParams = {},
-    ) =>
+    postHttpImportPreview: (data: HttpImportPreviewInput, params: RequestParams = {}) =>
       this.request<
         HttpImportPreviewResponse,
         {
@@ -3201,10 +2986,7 @@ export class Api<
      * @name PostHttpImportApply
      * @request POST:/http-import/apply
      */
-    postHttpImportApply: (
-      data: HttpImportApplyInput,
-      params: RequestParams = {},
-    ) =>
+    postHttpImportApply: (data: HttpImportApplyInput, params: RequestParams = {}) =>
       this.request<
         HttpImportApplyResponse,
         {
@@ -3227,10 +3009,7 @@ export class Api<
      * @name PostImportsPreview
      * @request POST:/imports/preview
      */
-    postImportsPreview: (
-      data: ImportPreviewInput,
-      params: RequestParams = {},
-    ) =>
+    postImportsPreview: (data: ImportPreviewInput, params: RequestParams = {}) =>
       this.request<
         ImportPreviewResponse,
         {

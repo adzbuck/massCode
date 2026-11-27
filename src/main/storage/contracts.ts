@@ -270,6 +270,7 @@ export interface NotesQueryInput {
   propertyStatus?: string
   propertyStatusNot?: string
   propertyType?: string
+  propertyTypeNot?: string
   hideCompletedTasks?: number
   // Server-only флаг (не HTTP-параметр): дочитать тела заметок перед
   // построением records — для потоков, которым нужен content (graph,
@@ -369,7 +370,7 @@ export interface NotesStorage {
     noteId: number,
     tagId: number,
   ) => NoteTagDeleteRelationResult
-  emptyTrash: () => { deletedCount: number }
+  emptyTrash: (query?: Pick<NotesQueryInput, 'propertyType' | 'propertyTypeNot'>) => { deletedCount: number }
   getNoteById: (id: number) => NoteRecord | null
   getNotes: (query: NotesQueryInput) => NoteRecord[]
   getNotesAsync?: (query: NotesQueryInput) => Promise<NoteRecord[]>

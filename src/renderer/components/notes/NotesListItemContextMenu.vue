@@ -72,11 +72,15 @@ const { confirm } = useDialog()
 const { sonner } = useSonner()
 
 const isFavoritesLibrarySelected = computed(
-  () => notesState.libraryFilter === LibraryFilter.Favorites,
+  () =>
+    notesState.libraryFilter === LibraryFilter.Favorites
+    || notesState.libraryFilter === LibraryFilter.TasksFavorites,
 )
 
 const isTrashLibrarySelected = computed(
-  () => notesState.libraryFilter === LibraryFilter.Trash,
+  () =>
+    notesState.libraryFilter === LibraryFilter.Trash
+    || notesState.libraryFilter === LibraryFilter.TasksTrash,
 )
 const isTask = computed(() => isTaskNote(props.note))
 
@@ -323,7 +327,7 @@ async function onConvertToNote() {
       @click="onDelete"
     >
       {{
-        notesState.libraryFilter === LibraryFilter.Trash
+        isTrashLibrarySelected
           ? i18n.t("action.delete.common")
           : i18n.t("action.move.toTrash")
       }}

@@ -62,9 +62,12 @@ export function useNotesWorkspaceNavigation() {
       await getNotes({ folderId: note.folder.id })
     }
     else {
+      const isTask = note.properties?.type === 'task'
       notesState.folderId = undefined
-      notesState.libraryFilter = LibraryFilter.Inbox
-      await getNotes({ isInbox: 1 })
+      notesState.libraryFilter = isTask
+        ? LibraryFilter.TasksInbox
+        : LibraryFilter.Inbox
+      await getNotes(getLibraryFilterQuery(notesState.libraryFilter))
     }
 
     selectNote(noteId)

@@ -10,7 +10,7 @@ import {
 } from '@/composables'
 import { i18n } from '@/electron'
 
-const { tags, deleteNoteTag } = useNoteTags()
+const { tags, getNoteTags, deleteNoteTag } = useNoteTags()
 const { highlightedTagId, notesState } = useNotesApp()
 const {
   getNotes,
@@ -21,6 +21,12 @@ const {
 } = useNotes()
 const { clearSearch } = useNoteSearch()
 const { clearFolderSelection } = useNoteFolders()
+
+onMounted(() => {
+  if (!tags.value.length) {
+    void getNoteTags()
+  }
+})
 
 const idToDelete = ref(0)
 

@@ -13,7 +13,13 @@ import { LibraryFilter } from '@/composables/types'
 import { i18n } from '@/electron'
 import { useDebounceFn } from '@vueuse/core'
 import {
+  CalendarCheck,
+  CalendarClock,
   Check,
+  CheckCircle2,
+  Circle,
+  CircleAlert,
+  CircleDot,
   FileText,
   Kanban,
   ListTodo,
@@ -54,6 +60,72 @@ const {
 const { folders, getFolderByIdFromTree } = useNoteFolders()
 const { tags } = useNoteTags()
 const isCreateMenuOpen = ref(false)
+const isSearchFilterMenuOpen = ref(false)
+
+const searchFilterOptions = computed(() => [
+  {
+    token: 'due:today',
+    label: i18n.t('notes.tasks.today'),
+    icon: CalendarCheck,
+    group: 'due',
+  },
+  {
+    token: 'due:upcoming',
+    label: i18n.t('notes.tasks.upcoming'),
+    icon: CalendarClock,
+    group: 'due',
+  },
+  {
+    token: 'status:todo',
+    label: i18n.t('notes.tasks.status.todo'),
+    icon: Circle,
+    group: 'status',
+  },
+  {
+    token: 'status:inProgress',
+    label: i18n.t('notes.tasks.status.inProgress'),
+    icon: CircleDot,
+    group: 'status',
+  },
+  {
+    token: 'status:blocked',
+    label: i18n.t('notes.tasks.status.blocked'),
+    icon: CircleAlert,
+    group: 'status',
+  },
+  {
+    token: 'status:done',
+    label: i18n.t('notes.tasks.completed'),
+    icon: CheckCircle2,
+    group: 'status',
+  },
+])
+
+function isSearchFilterTokenActive(token: string) {
+  const words = searchQuery.value.trim().split(/\s+/).filter(Boolean)
+  return words.some(word => word.toLowerCase() === token.toLowerCase())
+}
+
+function applySearchFilter(option: (typeof searchFilterOptions.value)[number]) {
+  const words = searchQuery.value.trim().split(/\s+/).filter(Boolean)
+  const prefix = `${option.group}:`
+  const isAlreadyActive = words.some(
+    word => word.toLowerCase() === option.token.toLowerCase(),
+  )
+  const filteredWords = words.filter(
+    word => !word.toLowerCase().startsWith(prefix),
+  )
+
+  if (!isAlreadyActive) {
+    filteredWords.unshift(option.token)
+  }
+
+  searchQuery.value = filteredWords.length
+    ? `${filteredWords.join(' ')} `
+    : ''
+  isSearchFilterMenuOpen.value = false
+  isFocusedSearch.value = true
+}
 
 async function onToggleTasksKanbanView() {
   toggleTasksKanbanView()
@@ -66,14 +138,18 @@ const isViewingTrash = computed(
   () =>
     !notesState.folderId
     && !notesState.tagId
-    && notesState.libraryFilter === LibraryFilter.Trash,
+    && (notesState.libraryFilter === LibraryFilter.Trash
+      || notesState.libraryFilter === LibraryFilter.TasksTrash),
 )
 
 const libraryFilterLabels = computed<Record<string, string>>(() => ({
   [LibraryFilter.Inbox]: i18n.t('common.inbox'),
   [LibraryFilter.Favorites]: i18n.t('common.favorites'),
   [LibraryFilter.All]: i18n.t('spaces.notes.allNotes'),
+  [LibraryFilter.TasksInbox]: i18n.t('common.inbox'),
+  [LibraryFilter.TasksFavorites]: i18n.t('common.favorites'),
   [LibraryFilter.Tasks]: i18n.t('notes.tasks.title'),
+  [LibraryFilter.TasksTrash]: i18n.t('common.trash'),
   [LibraryFilter.Today]: i18n.t('notes.tasks.today'),
   [LibraryFilter.Upcoming]: i18n.t('notes.tasks.upcoming'),
   [LibraryFilter.Todo]: i18n.t('notes.tasks.status.todo'),
@@ -162,7 +238,46 @@ function onKeydown(event: KeyboardEvent) {
     "
   >
     <div class="flex items-center px-1">
-      <Search class="text-muted-foreground ml-1 h-4 w-4 shrink-0" />
+      <Popover.Popover v-model:open="isSearchFilterMenuOpen">
+        <Popover.PopoverTrigger as-child>
+          <UiActionButton
+            data-notes-search-filters
+            :aria-label="i18n.t('placeholder.searchNotes')"
+          >
+            <Search class="h-4 w-4" />
+          </UiActionButton>
+        </Popover.PopoverTrigger>
+        <Popover.PopoverContent
+          align="start"
+          class="flex w-max max-w-(--reka-popover-content-available-width) min-w-[min(11rem,var(--reka-popover-content-available-width))] flex-col p-1"
+        >
+          <Button
+            v-for="option in searchFilterOptions"
+            :key="option.token"
+            variant="ghost"
+            size="sm"
+            :data-search-filter-token="option.token"
+            class="w-full min-w-0 justify-start"
+            @click="applySearchFilter(option)"
+          >
+            <component
+              :is="option.icon"
+              class="h-4 w-4 shrink-0"
+            />
+            <UiText
+              variant="base"
+              weight="medium"
+              class="min-w-0 truncate leading-5 text-inherit"
+            >
+              {{ option.label }}
+            </UiText>
+            <Check
+              class="ml-auto h-4 w-4"
+              :class="{ invisible: !isSearchFilterTokenActive(option.token) }"
+            />
+          </Button>
+        </Popover.PopoverContent>
+      </Popover.Popover>
       <div class="min-w-0 flex-grow">
         <UiInput
           v-model="searchQuery"

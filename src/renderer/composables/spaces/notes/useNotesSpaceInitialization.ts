@@ -44,7 +44,7 @@ async function initNotesSpace() {
   })
 
   isNotesSpaceInitialized.value = results.every(
-    result => result.status === 'fulfilled',
+    result => result.status === 'fulfilled' && result.value !== false,
   )
 
   if (isNotesSpaceInitialized.value) {

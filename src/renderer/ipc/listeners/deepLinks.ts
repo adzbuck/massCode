@@ -231,13 +231,32 @@ export async function openNoteDeepLink(
         await getNotes({ folderId: note.folder.id })
       }
       else {
+        const isTask = note.properties?.type === 'task'
         clearNoteFolderSelection()
         notesState.tagId = undefined
         notesState.libraryFilter = note.isDeleted
-          ? LibraryFilter.Trash
-          : LibraryFilter.Inbox
+          ? isTask
+            ? LibraryFilter.TasksTrash
+            : LibraryFilter.Trash
+          : isTask
+            ? LibraryFilter.TasksInbox
+            : LibraryFilter.Inbox
 
-        await getNotes(note.isDeleted ? { isDeleted: 1 } : { isInbox: 1 })
+        await getNotes(
+          note.isDeleted
+            ? {
+                isDeleted: 1,
+                ...(isTask
+                  ? { propertyType: 'task' }
+                  : { propertyTypeNot: 'task' }),
+              }
+            : {
+                isInbox: 1,
+                ...(isTask
+                  ? { propertyType: 'task' }
+                  : { propertyTypeNot: 'task' }),
+              },
+        )
       }
 
       if (history)

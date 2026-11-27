@@ -71,11 +71,17 @@ const notesTasksCleanupResponse = t.Object({
   count: t.Number(),
 })
 
+const notesTrashQuery = t.Object({
+  propertyType: t.Optional(t.String()),
+  propertyTypeNot: t.Optional(t.String()),
+})
+
 export const notesDTO = new Elysia().model({
   notesAdd,
   notesContentUpdate,
   notesCountsResponse,
   notesTasksCleanupResponse,
+  notesTrashQuery,
   noteItemResponse: noteItem,
   noteProperties,
   notesResponse,
@@ -93,6 +99,7 @@ export const notesDTO = new Elysia().model({
     propertyStatus: t.Optional(t.String()),
     propertyStatusNot: t.Optional(t.String()),
     propertyType: t.Optional(t.String()),
+    propertyTypeNot: t.Optional(t.String()),
     hideCompletedTasks: t.Optional(t.Number({ minimum: 0, maximum: 1 })),
   }),
   notePropertiesUpdate,

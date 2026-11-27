@@ -162,6 +162,13 @@ function applyNotePropertyFilters(
   }
 
   if (
+    query.propertyTypeNot !== undefined
+    && normalizePropertyText(note.properties.type) === query.propertyTypeNot
+  ) {
+    return false
+  }
+
+  if (
     query.propertyStatus !== undefined
     && normalizeTaskOrNoteStatus(note.properties) !== query.propertyStatus
   ) {
@@ -618,11 +625,14 @@ export function createNotesNotesStorage(): NotesStorage {
       return result
     },
 
-    emptyTrash() {
+    emptyTrash(query?: Pick<NotesQueryInput, 'propertyType' | 'propertyTypeNot'>) {
       const paths = resolvePaths()
       const { state, notes } = getNotesRuntimeCache(paths)
 
       const result = emptyEntityTrashFromStateAndDisk({
+        predicate: query
+          ? note => applyNotePropertyFilters(note, query)
+          : undefined,
         rootPath: paths.notesRoot,
         runtimeEntities: notes,
         stateEntities: state.notes,

@@ -76,6 +76,7 @@ interface NotesQuery {
   propertyStatus?: string
   propertyStatusNot?: string
   propertyType?: string
+  propertyTypeNot?: string
   hideCompletedTasks?: number
 }
 
@@ -254,23 +255,86 @@ const LIBRARY_FILTER_REQUIRED_TASK_STATUS: Partial<
   [LibraryFilter.Completed]: NoteTaskStatus.Done,
 }
 
+const TASK_STATUS_FILTER_TOKENS: Record<string, NoteTaskStatusValue> = {
+  'blocked': NoteTaskStatus.Blocked,
+  'completed': NoteTaskStatus.Done,
+  'done': NoteTaskStatus.Done,
+  'in-progress': NoteTaskStatus.InProgress,
+  'inprogress': NoteTaskStatus.InProgress,
+  'todo': NoteTaskStatus.Todo,
+}
+
+export function parseNotesSearchQuery(rawQuery?: string): NotesQuery {
+  if (!rawQuery) {
+    return {}
+  }
+
+  const words = rawQuery.trim().split(/\s+/).filter(Boolean)
+  const remainingWords: string[] = []
+  const parsed: NotesQuery = {}
+
+  for (const word of words) {
+    const lower = word.toLowerCase()
+    if (lower === 'due:today') {
+      parsed.propertyDue = 'today'
+      parsed.propertyStatusNot = 'done'
+      parsed.propertyType = 'task'
+      delete parsed.propertyTypeNot
+      continue
+    }
+    if (lower === 'due:upcoming') {
+      parsed.propertyDue = 'upcoming'
+      parsed.propertyStatusNot = 'done'
+      parsed.propertyType = 'task'
+      delete parsed.propertyTypeNot
+      continue
+    }
+    if (lower.startsWith('status:')) {
+      const token = lower.slice('status:'.length)
+      const status = TASK_STATUS_FILTER_TOKENS[token]
+      if (status) {
+        parsed.propertyStatus = status
+        parsed.propertyType = 'task'
+        delete parsed.propertyTypeNot
+        continue
+      }
+    }
+    remainingWords.push(word)
+  }
+
+  if (remainingWords.length) {
+    parsed.search = remainingWords.join(' ')
+  }
+
+  return parsed
+}
+
 export function getLibraryFilterQuery(
   filter?: (typeof LibraryFilter)[keyof typeof LibraryFilter],
 ): NotesQuery {
   if (filter === LibraryFilter.Favorites) {
-    return { isFavorites: 1 }
+    return { isFavorites: 1, propertyTypeNot: 'task' }
   }
   if (filter === LibraryFilter.Trash) {
-    return { isDeleted: 1 }
+    return { isDeleted: 1, propertyTypeNot: 'task' }
   }
   if (filter === LibraryFilter.All) {
-    return { isDeleted: 0 }
+    return { isDeleted: 0, propertyTypeNot: 'task' }
   }
   if (filter === LibraryFilter.Inbox) {
-    return { isInbox: 1 }
+    return { isInbox: 1, propertyTypeNot: 'task' }
   }
   if (filter === LibraryFilter.Tasks) {
     return { propertyType: 'task' }
+  }
+  if (filter === LibraryFilter.TasksInbox) {
+    return { isInbox: 1, propertyType: 'task' }
+  }
+  if (filter === LibraryFilter.TasksFavorites) {
+    return { isFavorites: 1, propertyType: 'task' }
+  }
+  if (filter === LibraryFilter.TasksTrash) {
+    return { isDeleted: 1, propertyType: 'task' }
   }
   if (filter === LibraryFilter.Today) {
     return {
@@ -302,20 +366,22 @@ export function getLibraryFilterQuery(
 const queryByLibraryOrFolderOrSearch = computed(() => {
   const query: NotesQuery = {}
 
-  if (isSearch.value && searchQuery.value) {
-    query.search = searchQuery.value
-  }
-
   if (notesState.tagId) {
     query.tagId = notesState.tagId
-    return query
   }
-
-  if (notesState.folderId) {
+  else if (notesState.folderId) {
     query.folderId = notesState.folderId
   }
   else {
     Object.assign(query, getLibraryFilterQuery(notesState.libraryFilter))
+  }
+
+  if (isSearch.value && searchQuery.value) {
+    const parsedSearch = parseNotesSearchQuery(searchQuery.value)
+    if (parsedSearch.propertyType !== undefined) {
+      delete query.propertyTypeNot
+    }
+    Object.assign(query, parsedSearch)
   }
 
   return query
@@ -421,15 +487,18 @@ function ensureCreateResultCanBeListed(payload?: CreateNotePayload) {
       ? payload.properties.status
       : NoteTaskStatus.Todo
   const filter = notesState.libraryFilter
+  const filterQuery = getLibraryFilterQuery(filter)
   const requiredStatus = filter
     ? LIBRARY_FILTER_REQUIRED_TASK_STATUS[filter]
     : undefined
-  const isTaskLibrary = getLibraryFilterQuery(filter).propertyType === 'task'
+  const isTaskLibrary = filterQuery.propertyType === 'task'
+  const isNoteOnlyLibrary = filterQuery.propertyTypeNot === 'task'
 
   if (
     isTask
-    && (filter === LibraryFilter.Favorites
-      || filter === LibraryFilter.Trash
+    && (isNoteOnlyLibrary
+      || filter === LibraryFilter.TasksFavorites
+      || filter === LibraryFilter.TasksTrash
       || filter === LibraryFilter.Today
       || filter === LibraryFilter.Upcoming
       || (requiredStatus !== undefined && taskStatus !== requiredStatus))
@@ -871,7 +940,9 @@ async function deleteSelectedNotes(fallbackNote?: NoteRecord) {
   }
 }
 
-async function emptyTrash() {
+async function emptyTrash(
+  filterQuery?: Pick<NotesQuery, 'propertyType' | 'propertyTypeNot'>,
+) {
   const { confirm } = useDialog()
 
   const isConfirmed = await confirm({
@@ -880,7 +951,14 @@ async function emptyTrash() {
   })
 
   if (isConfirmed) {
-    await api.notes.deleteNotesTrash()
+    const resolvedTrashQuery
+      = filterQuery
+        ?? (notesState.libraryFilter === LibraryFilter.TasksTrash
+          ? { propertyType: 'task' }
+          : notesState.libraryFilter === LibraryFilter.Trash
+            ? { propertyTypeNot: 'task' }
+            : undefined)
+    await api.notes.deleteNotesTrash(resolvedTrashQuery)
     await getNotes(queryByLibraryOrFolderOrSearch.value)
     selectFirstNote()
   }
