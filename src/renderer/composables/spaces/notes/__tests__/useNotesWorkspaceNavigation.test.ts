@@ -100,6 +100,9 @@ it.each([
       propertyStatusNot: 'done',
     },
   ],
+  ['todo', { propertyType: 'task', propertyStatus: 'todo' }],
+  ['inProgress', { propertyType: 'task', propertyStatus: 'inProgress' }],
+  ['blocked', { propertyType: 'task', propertyStatus: 'blocked' }],
   ['completed', { propertyType: 'task', propertyStatus: 'done' }],
 ] as const)(
   'loads the actual %s filter, clears competing filters and selects after success',

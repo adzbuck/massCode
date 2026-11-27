@@ -486,6 +486,45 @@ describe('useNotes', () => {
     })
   })
 
+  it.each([
+    ['todo', { propertyStatus: 'todo', propertyType: 'task' }],
+    ['inProgress', { propertyStatus: 'inProgress', propertyType: 'task' }],
+    ['blocked', { propertyStatus: 'blocked', propertyType: 'task' }],
+  ] as const)('queries %s task status library filter', async (libraryFilter, expectedQuery) => {
+    const context = await setup({ libraryFilter })
+
+    await context.useNotes().getNotes()
+
+    expect(context.getNotes).toHaveBeenCalledWith(expectedQuery)
+  })
+
+  it('keeps the Todo library filter when creating a new task from Todo', async () => {
+    const context = await setup({
+      libraryFilter: 'todo',
+      nextNotes: [{ id: 7, folder: null, name: 'Created Task' }],
+    })
+
+    await context.useNotes().createTaskAndSelect()
+
+    expect(context.notesState.libraryFilter).toBe('todo')
+    expect(context.notesState.noteId).toBe(7)
+  })
+
+  it.each(['inProgress', 'blocked'] as const)(
+    'switches %s task status filter to Tasks when creating a new todo task',
+    async (libraryFilter) => {
+      const context = await setup({
+        libraryFilter,
+        nextNotes: [{ id: 7, folder: null, name: 'Created Task' }],
+      })
+
+      await context.useNotes().createTaskAndSelect()
+
+      expect(context.notesState.libraryFilter).toBe('tasks')
+      expect(context.notesState.noteId).toBe(7)
+    },
+  )
+
   it('combines search with task library filters', async () => {
     const context = await setup({
       isSearch: true,

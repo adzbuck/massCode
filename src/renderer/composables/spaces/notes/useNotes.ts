@@ -9,7 +9,7 @@ import { getContiguousSelection } from '@/utils'
 import { benchmarkStart } from '@/utils/benchmark'
 import { api } from '~/renderer/services/api'
 import { LibraryFilter } from '../../types'
-import { NoteTaskStatus } from './taskProperties'
+import { NoteTaskStatus, type NoteTaskStatusValue } from './taskProperties'
 import { useNoteContent } from './useNoteContent'
 import { useNotesApp } from './useNotesApp'
 import { isSearch, notesBySearch, searchQuery } from './useNoteSearch'
@@ -241,6 +241,18 @@ function getActionTargetNotes(targetIds: number[], fallbackNote?: NoteRecord) {
   return targetNotes
 }
 
+const LIBRARY_FILTER_REQUIRED_TASK_STATUS: Partial<
+  Record<
+    (typeof LibraryFilter)[keyof typeof LibraryFilter],
+    NoteTaskStatusValue
+  >
+> = {
+  [LibraryFilter.Todo]: NoteTaskStatus.Todo,
+  [LibraryFilter.InProgress]: NoteTaskStatus.InProgress,
+  [LibraryFilter.Blocked]: NoteTaskStatus.Blocked,
+  [LibraryFilter.Completed]: NoteTaskStatus.Done,
+}
+
 export function getLibraryFilterQuery(
   filter?: (typeof LibraryFilter)[keyof typeof LibraryFilter],
 ): NotesQuery {
@@ -273,9 +285,12 @@ export function getLibraryFilterQuery(
       propertyType: 'task',
     }
   }
-  if (filter === LibraryFilter.Completed) {
+  const requiredStatus = filter
+    ? LIBRARY_FILTER_REQUIRED_TASK_STATUS[filter]
+    : undefined
+  if (requiredStatus) {
     return {
-      propertyStatus: 'done',
+      propertyStatus: requiredStatus,
       propertyType: 'task',
     }
   }
@@ -400,14 +415,23 @@ function isTaskCreatePayload(payload?: CreateNotePayload): boolean {
 
 function ensureCreateResultCanBeListed(payload?: CreateNotePayload) {
   const isTask = isTaskCreatePayload(payload)
+  const taskStatus
+    = typeof payload?.properties?.status === 'string'
+      ? payload.properties.status
+      : NoteTaskStatus.Todo
+  const filter = notesState.libraryFilter
+  const requiredStatus = filter
+    ? LIBRARY_FILTER_REQUIRED_TASK_STATUS[filter]
+    : undefined
+  const isTaskLibrary = getLibraryFilterQuery(filter).propertyType === 'task'
 
   if (
     isTask
-    && (notesState.libraryFilter === LibraryFilter.Favorites
-      || notesState.libraryFilter === LibraryFilter.Trash
-      || notesState.libraryFilter === LibraryFilter.Today
-      || notesState.libraryFilter === LibraryFilter.Upcoming
-      || notesState.libraryFilter === LibraryFilter.Completed)
+    && (filter === LibraryFilter.Favorites
+      || filter === LibraryFilter.Trash
+      || filter === LibraryFilter.Today
+      || filter === LibraryFilter.Upcoming
+      || (requiredStatus !== undefined && taskStatus !== requiredStatus))
   ) {
     notesState.libraryFilter = LibraryFilter.Tasks
     return
@@ -415,12 +439,9 @@ function ensureCreateResultCanBeListed(payload?: CreateNotePayload) {
 
   if (
     !isTask
-    && (notesState.libraryFilter === LibraryFilter.Trash
-      || notesState.libraryFilter === LibraryFilter.Favorites
-      || notesState.libraryFilter === LibraryFilter.Tasks
-      || notesState.libraryFilter === LibraryFilter.Today
-      || notesState.libraryFilter === LibraryFilter.Upcoming
-      || notesState.libraryFilter === LibraryFilter.Completed)
+    && (filter === LibraryFilter.Trash
+      || filter === LibraryFilter.Favorites
+      || isTaskLibrary)
   ) {
     notesState.libraryFilter = LibraryFilter.All
   }

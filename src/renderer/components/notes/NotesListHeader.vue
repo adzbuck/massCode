@@ -42,6 +42,9 @@ const libraryFilterLabels = computed<Record<string, string>>(() => ({
   [LibraryFilter.Tasks]: i18n.t('notes.tasks.title'),
   [LibraryFilter.Today]: i18n.t('notes.tasks.today'),
   [LibraryFilter.Upcoming]: i18n.t('notes.tasks.upcoming'),
+  [LibraryFilter.Todo]: i18n.t('notes.tasks.status.todo'),
+  [LibraryFilter.InProgress]: i18n.t('notes.tasks.status.inProgress'),
+  [LibraryFilter.Blocked]: i18n.t('notes.tasks.status.blocked'),
   [LibraryFilter.Completed]: i18n.t('notes.tasks.completed'),
   [LibraryFilter.Trash]: i18n.t('common.trash'),
 }))

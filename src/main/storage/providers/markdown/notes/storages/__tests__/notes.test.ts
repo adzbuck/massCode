@@ -850,6 +850,9 @@ describe('notes storage validations', () => {
       const storage = createNotesNotesStorage()
       const today = storage.createNote({ name: 'Today Task' })
       const upcoming = storage.createNote({ name: 'Upcoming Task' })
+      const unsetTodo = storage.createNote({ name: 'Unset Status Task' })
+      const inProgress = storage.createNote({ name: 'In Progress Task' })
+      const blocked = storage.createNote({ name: 'Blocked Task' })
       const done = storage.createNote({ name: 'Done Task' })
       const regular = storage.createNote({ name: 'Regular Note' })
 
@@ -867,6 +870,23 @@ describe('notes storage validations', () => {
           type: 'task',
         },
       })
+      storage.updateNoteProperties(unsetTodo.id, {
+        properties: {
+          type: 'task',
+        },
+      })
+      storage.updateNoteProperties(inProgress.id, {
+        properties: {
+          status: 'inProgress',
+          type: 'task',
+        },
+      })
+      storage.updateNoteProperties(blocked.id, {
+        properties: {
+          status: 'blocked',
+          type: 'task',
+        },
+      })
       storage.updateNoteProperties(done.id, {
         properties: {
           due: '2026-05-12',
@@ -877,7 +897,16 @@ describe('notes storage validations', () => {
 
       expect(
         storage.getNotes({ propertyType: 'task' }).map(note => note.id),
-      ).toEqual(expect.arrayContaining([today.id, upcoming.id, done.id]))
+      ).toEqual(
+        expect.arrayContaining([
+          today.id,
+          upcoming.id,
+          unsetTodo.id,
+          inProgress.id,
+          blocked.id,
+          done.id,
+        ]),
+      )
       expect(
         storage
           .getNotes({
@@ -912,6 +941,30 @@ describe('notes storage validations', () => {
           })
           .map(note => note.id),
       ).toEqual([upcoming.id])
+      expect(
+        storage
+          .getNotes({
+            propertyStatus: 'todo',
+            propertyType: 'task',
+          })
+          .map(note => note.id),
+      ).toEqual(expect.arrayContaining([today.id, upcoming.id, unsetTodo.id]))
+      expect(
+        storage
+          .getNotes({
+            propertyStatus: 'inProgress',
+            propertyType: 'task',
+          })
+          .map(note => note.id),
+      ).toEqual([inProgress.id])
+      expect(
+        storage
+          .getNotes({
+            propertyStatus: 'blocked',
+            propertyType: 'task',
+          })
+          .map(note => note.id),
+      ).toEqual([blocked.id])
       expect(
         storage
           .getNotes({

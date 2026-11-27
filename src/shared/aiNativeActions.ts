@@ -42,6 +42,9 @@ const listScopeSchema = z.discriminatedUnion('kind', [
         'tasks',
         'today',
         'upcoming',
+        'todo',
+        'inProgress',
+        'blocked',
         'completed',
       ]),
     })
@@ -367,7 +370,15 @@ export const aiNativeActionSchema = z.discriminatedUnion('action', [
   z
     .object({
       action: z.literal('notesLibrary'),
-      filter: z.enum(['tasks', 'today', 'upcoming', 'completed']),
+      filter: z.enum([
+        'tasks',
+        'today',
+        'upcoming',
+        'todo',
+        'inProgress',
+        'blocked',
+        'completed',
+      ]),
     })
     .strict(),
   z

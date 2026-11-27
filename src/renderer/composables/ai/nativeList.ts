@@ -133,7 +133,15 @@ export async function executeNativeList(
   if (
     scope?.kind === 'library'
     && action.space !== 'notes'
-    && ['tasks', 'today', 'upcoming', 'completed'].includes(scope.filter)
+    && [
+      'tasks',
+      'today',
+      'upcoming',
+      'todo',
+      'inProgress',
+      'blocked',
+      'completed',
+    ].includes(scope.filter)
   ) {
     return { status: 'unavailable' }
   }

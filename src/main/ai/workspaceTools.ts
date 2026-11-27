@@ -280,9 +280,16 @@ export function workspaceInventory(input: unknown) {
           && (taskType == null
             || ('properties' in item && item.properties?.type === taskType))
           && (taskStatus == null
-            || ('properties' in item && item.properties?.status === taskStatus))
-          && (folderId == null
-            || itemFolderId(item) === (folderId === 'inbox' ? null : folderId)),
+            || ('properties' in item
+              && (item.properties?.type === 'task'
+                ? (item.properties?.status === 'inProgress'
+                  || item.properties?.status === 'done'
+                  || item.properties?.status === 'blocked'
+                    ? item.properties.status
+                    : 'todo') === taskStatus
+                : item.properties?.status === taskStatus)))
+              && (folderId == null
+                || itemFolderId(item) === (folderId === 'inbox' ? null : folderId)),
     )
     .sort((a, b) => a.id - b.id)
   return {
