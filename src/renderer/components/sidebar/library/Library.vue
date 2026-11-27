@@ -14,6 +14,14 @@ import { i18n, store } from '@/electron'
 import { Archive, Inbox, Plus, Star, Trash } from 'lucide-vue-next'
 import { LAYOUT_DEFAULTS } from '~/main/store/constants'
 
+interface Props {
+  libraryOpen?: boolean
+}
+
+withDefaults(defineProps<Props>(), {
+  libraryOpen: true,
+})
+
 const { state } = useApp()
 const {
   getSnippets,
@@ -44,6 +52,14 @@ const tagsHeight = ref(
     store.app.get('code.layout.tagsListHeight') as number | undefined,
   ),
 )
+
+const foldersOpen = ref(
+  store.app.get<boolean>('code.layout.foldersOpen') ?? true,
+)
+
+watch(foldersOpen, (value) => {
+  store.app.set('code.layout.foldersOpen', value)
+})
 
 useResizeHandle(tagsHandleRef, {
   direction: 'vertical',
@@ -185,6 +201,7 @@ async function onFolderDrag({
 <template>
   <div class="flex h-full min-h-0 flex-col">
     <div
+      v-show="libraryOpen"
       class="shrink-0 overflow-hidden"
       data-sidebar-library
     >
@@ -209,46 +226,51 @@ async function onFolderDrag({
     </div>
 
     <div class="flex min-h-0 flex-1 flex-col">
-      <div class="min-h-0 flex-1">
-        <div class="flex h-full min-h-0 flex-col">
-          <SidebarSectionHeader :title="i18n.t('common.folders')">
-            <template #action>
-              <UiActionButton
-                :tooltip="i18n.t('action.new.folder')"
-                shortcut="CommandOrControl+Shift+N"
-                @click="createFolderAndSelect()"
-              >
-                <Plus class="h-4 w-4" />
-              </UiActionButton>
-            </template>
-          </SidebarSectionHeader>
+      <SidebarSectionHeader
+        v-model:open="foldersOpen"
+        collapsible
+        :title="i18n.t('common.folders')"
+      >
+        <template #action>
+          <UiActionButton
+            :tooltip="i18n.t('action.new.folder')"
+            shortcut="CommandOrControl+Shift+N"
+            @click="createFolderAndSelect()"
+          >
+            <Plus class="h-4 w-4" />
+          </UiActionButton>
+        </template>
+      </SidebarSectionHeader>
 
-          <div class="min-h-0 flex-1">
-            <Tree
-              v-if="folders?.length"
-              v-model="folders"
-              class="h-full px-0.5 pb-1"
-              @click-node="onFolderClick"
-              @toggle-node="onFolderToggle"
-              @drag-node="onFolderDrag"
-            />
+      <div
+        v-show="foldersOpen"
+        class="min-h-0 flex-1"
+      >
+        <Tree
+          v-if="folders?.length"
+          v-model="folders"
+          class="h-full px-0.5 pb-1"
+          @click-node="onFolderClick"
+          @toggle-node="onFolderToggle"
+          @drag-node="onFolderDrag"
+        />
 
-            <UiEmptyPlaceholder
-              v-else
-              :text="i18n.t('placeholder.emptyFoldersList')"
-            />
-          </div>
-        </div>
+        <UiEmptyPlaceholder
+          v-else
+          :text="i18n.t('placeholder.emptyFoldersList')"
+        />
       </div>
 
       <div
+        v-show="foldersOpen"
         ref="tagsHandleRef"
         class="before:bg-border hover:before:bg-primary data-[resizing]:before:bg-primary relative z-10 -mx-1 flex h-px shrink-0 cursor-row-resize items-center justify-center bg-transparent before:absolute before:inset-x-0 before:top-1/2 before:h-px before:-translate-y-1/2 before:transition-[background-color,height] before:duration-150 before:content-[''] after:absolute after:inset-x-0 after:top-1/2 after:h-3 after:-translate-y-1/2 after:content-[''] hover:before:h-0.5 hover:before:delay-200 data-[resizing]:before:h-0.5"
       />
 
       <div
-        :style="{ height: `${tagsHeight}px` }"
-        class="shrink-0 overflow-hidden"
+        :style="foldersOpen ? { height: `${tagsHeight}px` } : undefined"
+        class="overflow-hidden"
+        :class="foldersOpen ? 'shrink-0' : 'min-h-0 flex-1'"
       >
         <div class="flex h-full min-h-0 flex-col">
           <SidebarSectionHeader :title="i18n.t('common.tags')" />

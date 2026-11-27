@@ -1,9 +1,17 @@
 <script setup lang="ts">
 import { useImportDialog } from '@/composables'
-import { i18n } from '@/electron'
+import { i18n, store } from '@/electron'
 import { Upload } from 'lucide-vue-next'
 
 const { openImportDialog } = useImportDialog()
+
+const libraryOpen = ref(
+  store.app.get<boolean>('code.layout.libraryOpen') ?? true,
+)
+
+watch(libraryOpen, (value) => {
+  store.app.set('code.layout.libraryOpen', value)
+})
 </script>
 
 <template>
@@ -15,8 +23,10 @@ const { openImportDialog } = useImportDialog()
     "
   >
     <SidebarHeader
+      v-model:section-open="libraryOpen"
       :title="i18n.t('spaces.code.title')"
       :section-title="i18n.t('common.library')"
+      section-collapsible
     >
       <template #actions>
         <UiActionButton
@@ -27,6 +37,6 @@ const { openImportDialog } = useImportDialog()
         </UiActionButton>
       </template>
     </SidebarHeader>
-    <SidebarLibrary />
+    <SidebarLibrary :library-open="libraryOpen" />
   </div>
 </template>
