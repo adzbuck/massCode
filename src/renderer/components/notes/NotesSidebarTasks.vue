@@ -176,7 +176,6 @@ async function onDrop(item: (typeof taskItems)[number], event: DragEvent) {
 
   if (item.id === LibraryFilter.TasksToday) {
     await setTasksToday(noteIds, true)
-    selectFirstNote()
     return
   }
 
@@ -185,7 +184,6 @@ async function onDrop(item: (typeof taskItems)[number], event: DragEvent) {
       noteIds,
       noteIds.map(() => ({ isFavorites: 1, isDeleted: 0 })),
     )
-    selectFirstNote()
     return
   }
 

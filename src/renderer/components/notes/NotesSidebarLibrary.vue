@@ -158,7 +158,6 @@ async function onDrop(item: (typeof libraryItems)[number], event: DragEvent) {
       noteIds,
       noteIds.map(() => ({ isFavorites: 1, isDeleted: 0 })),
     )
-    selectFirstNote()
     return
   }
 

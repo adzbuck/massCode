@@ -12,7 +12,7 @@ const { saveNotesStateSnapshot, restoreNotesStateSnapshot, stateSnapshots }
 
 // --- Module-level state ---
 
-export const notesBySearch = shallowRef<any[]>()
+export const notesBySearch = ref<any[]>()
 export const isSearch = ref(false)
 export const searchQuery = ref('')
 const searchSelectedIndex = ref<number>(-1)

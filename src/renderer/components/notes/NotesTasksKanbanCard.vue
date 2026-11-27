@@ -5,6 +5,7 @@ import {
   getTaskDue,
   getTaskPriority,
   getTaskStatus,
+  isTaskToday,
   NoteTaskPriority,
   NoteTaskStatus,
   useNotes,
@@ -14,8 +15,11 @@ import { useDateFormat } from '@/composables/useDateFormat'
 import { i18n } from '@/electron'
 import { cn } from '@/utils'
 import { isBefore, isValid, parseISO, startOfDay } from 'date-fns'
-import { CalendarIcon, Flag, Folder } from 'lucide-vue-next'
-import { getTaskPriorityFlagClass } from './taskPriorityStyle'
+import { CalendarIcon, Flag, Folder, Star, Sun } from 'lucide-vue-next'
+import {
+  getTaskPriorityBorderClass,
+  getTaskPriorityFlagClass,
+} from './taskPriorityStyle'
 
 interface KanbanTaskTag {
   id: number
@@ -62,7 +66,11 @@ const isHighlighted = computed(() =>
   highlightedNoteIds.value.has(props.note.id),
 )
 const isDone = computed(() => getTaskStatus(props.note) === NoteTaskStatus.Done)
+const isInToday = computed(() => isTaskToday(props.note))
 const priority = computed(() => getTaskPriority(props.note))
+const priorityBorderClass = computed(() =>
+  getTaskPriorityBorderClass(priority.value),
+)
 const due = computed(() => getTaskDue(props.note))
 
 function onContextMenu() {
@@ -112,6 +120,7 @@ const formattedDueDate = computed(() => {
         :class="
           cn(
             'bg-background border-border hover:border-primary/40 group cursor-pointer space-y-1.5 rounded-md border p-2.5 shadow-xs transition-colors select-none',
+            priorityBorderClass,
             props.active && 'border-primary/60 bg-accent/40',
             isHighlighted && 'outline-primary outline-2 -outline-offset-2',
             props.dragging && 'opacity-50',
@@ -145,6 +154,16 @@ const formattedDueDate = computed(() => {
           >
             {{ props.note.name || i18n.t('notes.untitled') }}
           </UiText>
+          <Sun
+            v-if="isInToday"
+            class="mt-0.5 size-3.5 shrink-0 text-amber-500 dark:text-amber-400"
+            :aria-label="i18n.t('notes.tasks.today')"
+          />
+          <Star
+            v-if="props.note.isFavorites"
+            class="mt-0.5 size-3.5 shrink-0 fill-current stroke-current text-amber-500 dark:text-amber-400"
+            :aria-label="i18n.t('common.favorites')"
+          />
         </div>
 
         <div

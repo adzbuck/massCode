@@ -111,7 +111,7 @@ export const selectedNoteIds = ref<number[]>(
 )
 const lastSelectedNoteId = ref<number | undefined>()
 
-export const notes = shallowRef<NotesResponse>()
+export const notes = ref<NotesResponse>()
 
 // Список отдаёт только метаданные, поэтому полная запись выбранной заметки
 // (с контентом) загружается отдельно по id.
@@ -926,13 +926,30 @@ async function duplicateNote(noteId: number) {
   }
 }
 
-// Поля, влияющие на состав текущего списка: после их изменения нужен refetch.
 function isNoteListMembershipAffecting(data: NotesUpdate) {
-  return (
-    data.folderId !== undefined
-    || data.isDeleted !== undefined
-    || data.isFavorites !== undefined
-  )
+  if (data.isDeleted !== undefined) {
+    return true
+  }
+
+  if (data.folderId !== undefined) {
+    return (
+      notesState.folderId !== undefined
+      || (!notesState.tagId
+        && (notesState.libraryFilter === LibraryFilter.Inbox
+          || notesState.libraryFilter === LibraryFilter.TasksInbox))
+    )
+  }
+
+  if (data.isFavorites !== undefined) {
+    return (
+      !notesState.folderId
+      && !notesState.tagId
+      && (notesState.libraryFilter === LibraryFilter.Favorites
+        || notesState.libraryFilter === LibraryFilter.TasksFavorites)
+    )
+  }
+
+  return false
 }
 
 function patchNoteInCollections(noteId: number, data: NotesUpdate) {
@@ -975,20 +992,21 @@ function patchNoteInCollections(noteId: number, data: NotesUpdate) {
       return collection.filter(n => n.id !== noteId)
     }
 
+    const current = collection[index]
+    if (data.name !== undefined)
+      current.name = data.name
+    if (data.description !== undefined)
+      current.description = data.description
+    if (data.folderId === null)
+      current.folder = null
+    if (data.isDeleted !== undefined)
+      current.isDeleted = data.isDeleted
+    if (data.isFavorites !== undefined)
+      current.isFavorites = data.isFavorites
+    current.updatedAt = now
+
     const next = [...collection]
-    next[index] = {
-      ...next[index],
-      ...(data.name !== undefined ? { name: data.name } : {}),
-      ...(data.description !== undefined
-        ? { description: data.description }
-        : {}),
-      ...(data.folderId === null ? { folder: null } : {}),
-      ...(data.isDeleted !== undefined ? { isDeleted: data.isDeleted } : {}),
-      ...(data.isFavorites !== undefined
-        ? { isFavorites: data.isFavorites }
-        : {}),
-      updatedAt: now,
-    }
+    next[index] = { ...current }
     return next
   }
 
@@ -1059,10 +1077,15 @@ async function updateNotes(noteIds: number[], data: NotesUpdate[]) {
     }
   })
 
-  await getNotes(queryByLibraryOrFolderOrSearch.value)
-  selectFirstNoteIfCurrentSelectionIsMissing(previousNoteId)
-  if (notesState.noteId === previousNoteId && previousNoteId !== undefined) {
-    await refreshSelectedNote()
+  const needsListRefetch = data.some(item =>
+    item ? isNoteListMembershipAffecting(item) : false,
+  )
+  if (needsListRefetch) {
+    await getNotes(queryByLibraryOrFolderOrSearch.value)
+    selectFirstNoteIfCurrentSelectionIsMissing(previousNoteId)
+    if (notesState.noteId === previousNoteId && previousNoteId !== undefined) {
+      await refreshSelectedNote()
+    }
   }
 }
 
@@ -1131,6 +1154,8 @@ async function setTasksToday(noteIds: number[], isToday: boolean) {
         delete nextProperties.todayOrder
       }
 
+      item.properties = nextProperties
+
       return {
         ...item,
         properties: nextProperties,
@@ -1162,10 +1187,12 @@ async function setTasksToday(noteIds: number[], isToday: boolean) {
     ),
   )
 
-  await getNotes(queryByLibraryOrFolderOrSearch.value)
-  selectFirstNoteIfCurrentSelectionIsMissing(previousNoteId)
-  if (notesState.noteId === previousNoteId && previousNoteId !== undefined) {
-    await refreshSelectedNote()
+  if (shouldRemoveFromCurrentList) {
+    await getNotes(queryByLibraryOrFolderOrSearch.value)
+    selectFirstNoteIfCurrentSelectionIsMissing(previousNoteId)
+    if (notesState.noteId === previousNoteId && previousNoteId !== undefined) {
+      await refreshSelectedNote()
+    }
   }
 }
 

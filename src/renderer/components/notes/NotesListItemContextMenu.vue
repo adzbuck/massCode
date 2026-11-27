@@ -80,6 +80,9 @@ const isFavoritesLibrarySelected = computed(
     notesState.libraryFilter === LibraryFilter.Favorites
     || notesState.libraryFilter === LibraryFilter.TasksFavorites,
 )
+const isFavoriteNote = computed(
+  () => isFavoritesLibrarySelected.value || Boolean(props.note.isFavorites),
+)
 const isTasksTodayLibrarySelected = computed(
   () => notesState.libraryFilter === LibraryFilter.TasksToday,
 )
@@ -111,19 +114,24 @@ const removeFromFolderLabel = computed(() =>
 const isCloudPending = computed(() => props.note.pendingCloudDownload === true)
 
 async function onAddFavorites() {
-  const isFavorites = isFavoritesLibrarySelected.value ? 0 : 1
+  const isFavorites = isFavoriteNote.value ? 0 : 1
+  const targetIds
+    = selectedNoteIds.value.length > 1
+      && selectedNoteIds.value.includes(props.note.id)
+      ? selectedNoteIds.value
+      : [props.note.id]
 
-  if (selectedNoteIds.value.length > 1) {
-    const notesData = selectedNoteIds.value.map(() => ({ isFavorites }))
-    await updateNotes(selectedNoteIds.value, notesData)
+  if (targetIds.length > 1) {
+    const notesData = targetIds.map(() => ({ isFavorites }))
+    await updateNotes(targetIds, notesData)
   }
   else {
     await updateNote(props.note.id, { isFavorites })
   }
 
-  if (isFavoritesLibrarySelected.value) {
+  if (!isFavorites && isFavoritesLibrarySelected.value) {
     if (
-      selectedNoteIds.value.length > 1
+      targetIds.length > 1
       || notesState.noteId === props.note.id
     ) {
       selectFirstNote()
@@ -327,7 +335,7 @@ async function onConvertToNote() {
         @click="onAddFavorites"
       >
         {{
-          isFavoritesLibrarySelected
+          isFavoriteNote
             ? i18n.t("action.remove.fromFavorites")
             : i18n.t("action.add.toFavorites")
         }}
