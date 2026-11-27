@@ -11,6 +11,7 @@ import {
   CalendarCheck,
   CalendarClock,
   CheckCircle2,
+  ChevronRight,
   Circle,
   CircleAlert,
   CircleDot,
@@ -84,6 +85,11 @@ const libraryItems = [
 
 const focusedItemId = ref<string>()
 const itemRef = ref<HTMLElement>()
+const isTasksExpanded = ref(true)
+
+const visibleLibraryItems = computed(() =>
+  libraryItems.filter(item => !item.isNested || isTasksExpanded.value),
+)
 
 function isItemSelected(item: (typeof libraryItems)[number]) {
   return (
@@ -111,7 +117,7 @@ onClickOutside(itemRef, () => {
       <ContextMenu.ContextMenuTrigger>
         <div class="px-1">
           <div
-            v-for="item in libraryItems"
+            v-for="item in visibleLibraryItems"
             :key="item.id"
             data-sidebar-item
             :data-selected="isItemSelected(item) ? 'true' : undefined"
@@ -125,8 +131,24 @@ onClickOutside(itemRef, () => {
           >
             <div
               class="flex items-center"
-              :class="item.isNested ? 'ml-9' : 'ml-5.5'"
+              :class="
+                item.isNested
+                  ? 'ml-9'
+                  : item.id === LibraryFilter.Tasks
+                    ? ''
+                    : 'ml-5.5'
+              "
             >
+              <div
+                v-if="item.id === LibraryFilter.Tasks"
+                class="mx-0.75 flex h-4 w-4 shrink-0 items-center justify-center"
+                @click.stop="isTasksExpanded = !isTasksExpanded"
+              >
+                <ChevronRight
+                  class="h-3 w-3"
+                  :class="{ 'rotate-90': isTasksExpanded }"
+                />
+              </div>
               <component
                 :is="item.icon"
                 class="mr-0.5 h-4 w-4"
