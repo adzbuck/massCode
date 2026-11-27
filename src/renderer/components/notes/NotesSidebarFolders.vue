@@ -40,6 +40,22 @@ const tagsHeight = ref(
   ),
 )
 
+const foldersOpen = ref(
+  store.app.get<boolean>('notes.layout.foldersOpen') ?? true,
+)
+
+const tagsOpen = ref(
+  store.app.get<boolean>('notes.layout.tagsOpen') ?? true,
+)
+
+watch(foldersOpen, (value) => {
+  store.app.set('notes.layout.foldersOpen', value)
+})
+
+watch(tagsOpen, (value) => {
+  store.app.set('notes.layout.tagsOpen', value)
+})
+
 useResizeHandle(tagsHandleRef, {
   direction: 'vertical',
   onMove(dy) {
@@ -271,7 +287,11 @@ useDeleteShortcut({
 </script>
 
 <template>
-  <SidebarSectionHeader :title="i18n.t('common.folders')">
+  <SidebarSectionHeader
+    v-model:open="foldersOpen"
+    collapsible
+    :title="i18n.t('common.folders')"
+  >
     <template #action>
       <UiActionButton
         :tooltip="i18n.t('action.new.folder')"
@@ -283,7 +303,10 @@ useDeleteShortcut({
     </template>
   </SidebarSectionHeader>
   <div class="flex min-h-0 flex-1 flex-col">
-    <div class="min-h-0 flex-1 overflow-hidden">
+    <div
+      v-show="foldersOpen"
+      class="min-h-0 flex-1 overflow-hidden"
+    >
       <div
         data-notes-folders-tree
         class="h-full min-h-0"
@@ -343,16 +366,35 @@ useDeleteShortcut({
       </div>
     </div>
     <div
+      v-show="foldersOpen && tagsOpen"
       ref="tagsHandleRef"
       class="before:bg-border hover:before:bg-primary data-[resizing]:before:bg-primary relative z-10 -mx-1 flex h-px shrink-0 cursor-row-resize items-center justify-center bg-transparent before:absolute before:inset-x-0 before:top-1/2 before:h-px before:-translate-y-1/2 before:transition-[background-color,height] before:duration-150 before:content-[''] after:absolute after:inset-x-0 after:top-1/2 after:h-3 after:-translate-y-1/2 after:content-[''] hover:before:h-0.5 hover:before:delay-200 data-[resizing]:before:h-0.5"
     />
     <div
-      :style="{ height: `${tagsHeight}px` }"
-      class="shrink-0 overflow-hidden"
+      :style="
+        !tagsOpen
+          ? { height: '36px' }
+          : foldersOpen
+            ? { height: `${tagsHeight}px` }
+            : undefined
+      "
+      class="overflow-hidden"
+      :class="[
+        !foldersOpen && tagsOpen ? 'min-h-0 flex-1' : 'shrink-0',
+        { '-mx-1 border-t px-1': !foldersOpen || !tagsOpen },
+      ]"
     >
       <div class="flex h-full min-h-0 flex-col">
-        <SidebarSectionHeader :title="i18n.t('common.tags')" />
-        <div class="min-h-0 flex-1 px-1 pb-1">
+        <SidebarSectionHeader
+          v-model:open="tagsOpen"
+          collapsible
+          :title="i18n.t('common.tags')"
+          class="shrink-0"
+        />
+        <div
+          v-show="tagsOpen"
+          class="min-h-0 flex-1 px-1 pb-1"
+        >
           <NotesSidebarTags />
         </div>
       </div>

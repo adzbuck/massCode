@@ -2,9 +2,17 @@
 interface Props {
   title: string
   sectionTitle?: string
+  sectionCollapsible?: boolean
+  sectionOpen?: boolean
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
+const emit = defineEmits<{ 'update:sectionOpen': [value: boolean] }>()
+
+const open = computed({
+  get: () => props.sectionOpen,
+  set: value => emit('update:sectionOpen', Boolean(value)),
+})
 </script>
 
 <template>
@@ -22,7 +30,9 @@ defineProps<Props>()
     </div>
     <SidebarSectionHeader
       v-if="sectionTitle"
+      v-model:open="open"
       :title="sectionTitle"
+      :collapsible="sectionCollapsible"
     >
       <template
         v-if="$slots.action"

@@ -1,11 +1,19 @@
 <script setup lang="ts">
 import { useImportDialog, useNavigationHistory } from '@/composables'
-import { i18n } from '@/electron'
+import { i18n, store } from '@/electron'
 import { router, RouterName } from '@/router'
 import { LayoutGrid, Upload } from 'lucide-vue-next'
 
 const { isNavigatingHistory, recordNavigation } = useNavigationHistory()
 const { openImportDialog } = useImportDialog()
+
+const libraryOpen = ref(
+  store.app.get<boolean>('notes.layout.libraryOpen') ?? true,
+)
+
+watch(libraryOpen, (value) => {
+  store.app.set('notes.layout.libraryOpen', value)
+})
 
 async function openDashboard() {
   if (router.currentRoute.value.name === RouterName.notesDashboard) {
@@ -32,8 +40,10 @@ async function openDashboard() {
     "
   >
     <SidebarHeader
+      v-model:section-open="libraryOpen"
       :title="i18n.t('notes.plural')"
       :section-title="i18n.t('common.library')"
+      section-collapsible
     >
       <template #actions>
         <UiActionButton
@@ -50,7 +60,7 @@ async function openDashboard() {
         </UiActionButton>
       </template>
     </SidebarHeader>
-    <NotesSidebarLibrary />
+    <NotesSidebarLibrary v-show="libraryOpen" />
     <NotesSidebarFolders />
   </div>
 </template>
