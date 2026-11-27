@@ -7,6 +7,7 @@ import {
   getTaskPriority,
   getTaskStatus,
   isTaskNote,
+  isTaskToday,
   NoteTaskStatus,
   useApp,
   useNavigationHistory,
@@ -18,8 +19,14 @@ import { LibraryFilter } from '@/composables/types'
 import { useDateFormat } from '@/composables/useDateFormat'
 import { i18n } from '@/electron'
 import { isPast, isToday, isValid, parseISO } from 'date-fns'
-import { CalendarClock, CloudDownload, Flag, GripVertical } from 'lucide-vue-next'
-import { getTaskPriorityFlagClass } from './taskPriorityStyle'
+import {
+  CalendarClock,
+  CloudDownload,
+  GripVertical,
+  Star,
+  Sun,
+} from 'lucide-vue-next'
+import { getTaskPriorityBorderClass } from './taskPriorityStyle'
 
 interface NoteTagInfo {
   id: number
@@ -100,11 +107,12 @@ const folderName = computed(() => {
 })
 
 const isTask = computed(() => isTaskNote(props.note))
+const isTaskInToday = computed(() => isTask.value && isTaskToday(props.note))
 const taskStatus = computed(() => getTaskStatus(props.note))
 const isTaskDone = computed(() => taskStatus.value === NoteTaskStatus.Done)
 const taskPriority = computed(() => getTaskPriority(props.note))
-const taskPriorityFlagClass = computed(() =>
-  getTaskPriorityFlagClass(taskPriority.value),
+const taskPriorityBorderClass = computed(() =>
+  getTaskPriorityBorderClass(taskPriority.value),
 )
 const taskDue = computed(() => getTaskDue(props.note))
 const taskDueLabel = computed(() => {
@@ -299,14 +307,17 @@ async function onDropItem(event: DragEvent) {
   <div
     data-note-item
     class="border-border relative border-b px-1 focus-visible:outline-none"
-    :class="{
-      'is-selected': isSelected,
-      'is-multi-selected': isInMultiSelection,
-      'is-focused': isFocused,
-      'is-highlighted': isHighlighted,
-      'border-t-primary border-t-2': dropPosition === 'before',
-      'border-b-primary! border-b-2': dropPosition === 'after',
-    }"
+    :class="[
+      taskPriorityBorderClass,
+      {
+        'is-selected': isSelected,
+        'is-multi-selected': isInMultiSelection,
+        'is-focused': isFocused,
+        'is-highlighted': isHighlighted,
+        'border-t-primary border-t-2': dropPosition === 'before',
+        'border-b-primary! border-b-2': dropPosition === 'after',
+      },
+    ]"
     :draggable="!note.pendingCloudDownload"
     @click="(event) => onNoteClick(note.id, event)"
     @contextmenu="onClickContextMenu"
@@ -352,10 +363,15 @@ async function onDropItem(event: DragEvent) {
               class="text-muted-foreground size-3.5 shrink-0"
               :aria-label="i18n.t('cloudDownloads.label')"
             />
-            <Flag
-              v-if="taskPriority"
-              class="size-3.5 shrink-0 fill-current stroke-current"
-              :class="taskPriorityFlagClass"
+            <Sun
+              v-if="isTaskInToday"
+              class="size-3.5 shrink-0 text-amber-500 dark:text-amber-400"
+              :aria-label="i18n.t('notes.tasks.today')"
+            />
+            <Star
+              v-if="note.isFavorites"
+              class="size-3.5 shrink-0 fill-current stroke-current text-amber-500 dark:text-amber-400"
+              :aria-label="i18n.t('common.favorites')"
             />
           </div>
           <UiText
