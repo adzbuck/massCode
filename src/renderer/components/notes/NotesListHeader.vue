@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/shadcn/button'
 import * as Popover from '@/components/ui/shadcn/popover'
 import {
+  getLibraryFilterQuery,
   normalizeNotesSelectionState,
   useNoteFolders,
   useNotes,
@@ -23,7 +24,6 @@ import {
   FileText,
   Kanban,
   ListTodo,
-  MoreHorizontal,
   Plus,
   Search,
   Trash2,
@@ -39,7 +39,12 @@ const props = withDefaults(
   },
 )
 
-const { isSearch, createNoteBySelectedKindAndSelect, emptyTrash } = useNotes()
+const {
+  isSearch,
+  createNoteAndSelect,
+  createTaskAndSelect,
+  emptyTrash,
+} = useNotes()
 const {
   searchQuery,
   clearSearch,
@@ -51,7 +56,6 @@ const {
 const {
   hideCompletedTasksInFolders,
   isFocusedSearch,
-  notesCreateKind,
   notesState,
   isViewingTasks,
   isTasksKanbanView,
@@ -159,8 +163,18 @@ const libraryFilterLabels = computed<Record<string, string>>(() => ({
   [LibraryFilter.Trash]: i18n.t('common.trash'),
 }))
 
+const isViewingFolderOrTag = computed(() =>
+  Boolean(notesState.folderId || notesState.tagId),
+)
+
+const isTasksLibrarySelected = computed(
+  () =>
+    !isViewingFolderOrTag.value
+    && getLibraryFilterQuery(notesState.libraryFilter).propertyType === 'task',
+)
+
 const createActionTooltip = computed(() =>
-  notesCreateKind.value === 'task'
+  isTasksLibrarySelected.value
     ? i18n.t('action.new.task')
     : i18n.t('action.new.note'),
 )
@@ -186,9 +200,23 @@ const searchPlaceholder = computed(() =>
     : i18n.t('placeholder.searchNotes'),
 )
 
-function selectCreateKind(kind: 'note' | 'task') {
-  notesCreateKind.value = kind
+async function onCreateDirectClick() {
+  if (isTasksLibrarySelected.value) {
+    await createTaskAndSelect()
+    return
+  }
+
+  await createNoteAndSelect()
+}
+
+async function onCreateFromMenu(kind: 'note' | 'task') {
   isCreateMenuOpen.value = false
+  if (kind === 'task') {
+    await createTaskAndSelect()
+    return
+  }
+
+  await createNoteAndSelect()
 }
 
 // Без debounce каждый символ порождает full-text запрос, смену выбранной
@@ -320,25 +348,16 @@ function onKeydown(event: KeyboardEvent) {
       >
         <Kanban class="h-4 w-4" />
       </UiActionButton>
-      <UiActionButton
-        v-if="!searchQuery && !isSearch && !isViewingTrash"
-        :tooltip="createActionTooltip"
-        :shortcut="
-          notesCreateKind === 'task'
-            ? 'CommandOrControl+T'
-            : 'CommandOrControl+N'
-        "
-        @click="createNoteBySelectedKindAndSelect"
-      >
-        <Plus class="h-4 w-4" />
-      </UiActionButton>
       <Popover.Popover
-        v-if="!searchQuery && !isSearch && !isViewingTrash"
+        v-if="!searchQuery && !isSearch && !isViewingTrash && isViewingFolderOrTag"
         v-model:open="isCreateMenuOpen"
       >
         <Popover.PopoverTrigger as-child>
-          <UiActionButton :aria-label="i18n.t('action.createOptions')">
-            <MoreHorizontal class="h-4 w-4" />
+          <UiActionButton
+            data-notes-create-dropdown-trigger
+            :aria-label="i18n.t('action.createOptions')"
+          >
+            <Plus class="h-4 w-4" />
           </UiActionButton>
         </Popover.PopoverTrigger>
         <Popover.PopoverContent
@@ -348,8 +367,9 @@ function onKeydown(event: KeyboardEvent) {
           <Button
             variant="ghost"
             size="sm"
+            data-notes-create-option="note"
             class="w-full min-w-0 justify-start"
-            @click="selectCreateKind('note')"
+            @click="onCreateFromMenu('note')"
           >
             <FileText class="h-4 w-4" />
             <UiText
@@ -359,16 +379,13 @@ function onKeydown(event: KeyboardEvent) {
             >
               {{ i18n.t("action.new.note") }}
             </UiText>
-            <Check
-              class="ml-auto h-4 w-4"
-              :class="{ invisible: notesCreateKind !== 'note' }"
-            />
           </Button>
           <Button
             variant="ghost"
             size="sm"
+            data-notes-create-option="task"
             class="w-full min-w-0 justify-start"
-            @click="selectCreateKind('task')"
+            @click="onCreateFromMenu('task')"
           >
             <ListTodo class="h-4 w-4" />
             <UiText
@@ -378,13 +395,22 @@ function onKeydown(event: KeyboardEvent) {
             >
               {{ i18n.t("action.new.task") }}
             </UiText>
-            <Check
-              class="ml-auto h-4 w-4"
-              :class="{ invisible: notesCreateKind !== 'task' }"
-            />
           </Button>
         </Popover.PopoverContent>
       </Popover.Popover>
+      <UiActionButton
+        v-else-if="!searchQuery && !isSearch && !isViewingTrash"
+        data-notes-create-direct
+        :tooltip="createActionTooltip"
+        :shortcut="
+          isTasksLibrarySelected
+            ? 'CommandOrControl+T'
+            : 'CommandOrControl+N'
+        "
+        @click="onCreateDirectClick"
+      >
+        <Plus class="h-4 w-4" />
+      </UiActionButton>
     </div>
   </div>
 </template>

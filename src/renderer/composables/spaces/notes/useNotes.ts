@@ -503,6 +503,10 @@ function isTaskCreatePayload(payload?: CreateNotePayload): boolean {
 }
 
 function ensureCreateResultCanBeListed(payload?: CreateNotePayload) {
+  if (notesState.folderId || notesState.tagId) {
+    return
+  }
+
   const isTask = isTaskCreatePayload(payload)
   const taskStatus
     = typeof payload?.properties?.status === 'string'
@@ -647,6 +651,13 @@ async function createNote(payload?: CreateNotePayload) {
       ...(payload?.properties ? { properties: payload.properties } : {}),
     })
 
+    if (notesState.tagId) {
+      await api.notes.postNotesByIdTagsByTagId(
+        String(data.id),
+        String(notesState.tagId),
+      )
+    }
+
     useDonations().incrementCreated('notes')
 
     ensureCreateResultCanBeListed(payload)
@@ -683,6 +694,24 @@ async function createTaskAndSelect(payload?: CreateNotePayload) {
 }
 
 async function createNoteBySelectedKindAndSelect() {
+  if (
+    !notesState.folderId
+    && !notesState.tagId
+    && getLibraryFilterQuery(notesState.libraryFilter).propertyType === 'task'
+  ) {
+    await createTaskAndSelect()
+    return
+  }
+
+  if (
+    !notesState.folderId
+    && !notesState.tagId
+    && getLibraryFilterQuery(notesState.libraryFilter).propertyTypeNot === 'task'
+  ) {
+    await createNoteAndSelect()
+    return
+  }
+
   if (notesCreateKind.value === 'task') {
     await createTaskAndSelect()
     return

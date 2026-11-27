@@ -736,6 +736,40 @@ describe('useNotes', () => {
     expect(tasksInbox.notes.value?.map((n: any) => n.id)).toEqual([2])
   })
 
+  it('attaches the active tag when creating a note or task in a tag view and creates the right type for Notes vs Tasks', async () => {
+    const tagCtx = await setup({
+      tagId: 9,
+      nextNotes: [{ id: 7, folder: null, name: 'Tagged Task' }],
+    })
+    await tagCtx.useNotes().createTaskAndSelect()
+    expect(tagCtx.postNotesByIdTagsByTagId).toHaveBeenCalledWith('7', '9')
+    expect(tagCtx.getNotes).toHaveBeenLastCalledWith({ tagId: 9 })
+
+    const notesCtx = await setup({
+      libraryFilter: 'inbox',
+      nextNotes: [{ id: 7, folder: null, name: 'Inbox Note' }],
+    })
+    await notesCtx.useNotes().createNoteBySelectedKindAndSelect()
+    expect(notesCtx.postNotes).toHaveBeenCalledWith({
+      folderId: null,
+      name: 'notes.untitled 1',
+    })
+
+    const tasksCtx = await setup({
+      libraryFilter: 'tasksInbox',
+      nextNotes: [{ id: 7, folder: null, name: 'Inbox Task' }],
+    })
+    await tasksCtx.useNotes().createNoteBySelectedKindAndSelect()
+    expect(tasksCtx.postNotes).toHaveBeenCalledWith({
+      folderId: null,
+      name: 'notes.untitled 1',
+      properties: {
+        status: 'todo',
+        type: 'task',
+      },
+    })
+  })
+
   it('optimistically removes a note from the current folder list before patchNotesById resolves', async () => {
     const context = await setup({
       folderId: 5,
