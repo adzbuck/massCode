@@ -15,7 +15,6 @@ export const RouterName = {
   preferencesAI: 'preferences/ai',
   preferencesSemanticSearch: 'preferences/semantic-search',
   preferencesUpdates: 'preferences/updates',
-  preferencesSupporter: 'preferences/supporter',
   preferencesAbout: 'preferences/about',
   devtools: 'devtools',
   devtoolsCaseConverter: 'devtools/case-converter',
@@ -120,11 +119,6 @@ const routes = [
         path: 'updates',
         name: RouterName.preferencesUpdates,
         component: () => import('@/components/preferences/Updates.vue'),
-      },
-      {
-        path: 'supporter',
-        name: RouterName.preferencesSupporter,
-        component: () => import('@/components/preferences/Supporter.vue'),
       },
       {
         path: 'about',

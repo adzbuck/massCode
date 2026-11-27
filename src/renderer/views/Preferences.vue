@@ -10,7 +10,6 @@ import {
   Code2,
   Globe,
   HardDrive,
-  Heart,
   Info,
   Notebook,
   Palette,
@@ -85,11 +84,6 @@ const nav: { label: string, name: string, icon: Component }[] = [
     label: i18n.t('preferences:updates.label'),
     name: RouterName.preferencesUpdates,
     icon: RefreshCw,
-  },
-  {
-    label: i18n.t('preferences:supporter.label'),
-    name: RouterName.preferencesSupporter,
-    icon: Heart,
   },
   {
     label: i18n.t('preferences:about.label'),

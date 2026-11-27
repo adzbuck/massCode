@@ -203,33 +203,6 @@ const helpMenuItems: MenuConfig[] = [
     type: 'separator',
   },
   {
-    label: i18n.t('menu:help.donate.openCollective'),
-    click: () => {
-      shell.openExternal(
-        'https://opencollective.com/masscode?ref=masscode-app',
-      )
-    },
-  },
-  {
-    label: i18n.t('menu:help.donate.gumroad'),
-    click: () => {
-      shell.openExternal(
-        'https://antonreshetov.gumroad.com/l/masscode?ref=masscode-app',
-      )
-    },
-  },
-  {
-    label: i18n.t('menu:help.donate.payPal'),
-    click: () => {
-      shell.openExternal(
-        'https://www.paypal.com/paypalme/antongithub?ref=masscode-app',
-      )
-    },
-  },
-  {
-    type: 'separator',
-  },
-  {
     label: i18n.t('menu:help.devTools'),
     role: 'toggleDevTools',
   },

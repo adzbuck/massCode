@@ -4,7 +4,6 @@ import {
   useActivityTracker,
   useApp,
   useCopyTracker,
-  useDonationTriggers,
   useSonner,
   useTheme,
   useVaultDoctor,
@@ -21,7 +20,7 @@ import { Toaster } from 'vue-sonner'
 import { repository, version } from '../../package.json'
 import { registerIPCListeners } from './ipc'
 
-const { isAppLoading, isSponsored } = useApp()
+const { isAppLoading } = useApp()
 const route = useRoute()
 
 const showLoader = ref(false)
@@ -223,9 +222,6 @@ async function init() {
   restoreSavedSpace()
   useActivityTracker()
   useCopyTracker()
-  if (!isSponsored.value) {
-    useDonationTriggers()
-  }
   showWhatsNewOnce()
   checkVaultHealth()
 }

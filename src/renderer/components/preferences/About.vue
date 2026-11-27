@@ -41,10 +41,6 @@ const links = [
     label: i18n.t('preferences:about.license'),
     url: `${repository}/blob/HEAD/LICENSE?ref=masscode-app`,
   },
-  {
-    label: i18n.t('preferences:about.support'),
-    url: 'https://masscode.io/donate?ref=masscode-app',
-  },
 ]
 
 async function checkUpdates() {
