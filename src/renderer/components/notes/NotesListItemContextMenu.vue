@@ -10,6 +10,7 @@ import {
   NoteTaskStatus,
   useDialog,
   useDonations,
+  useNoteFolders,
   useNotes,
   useNotesApp,
   useSonner,
@@ -54,6 +55,7 @@ interface Props {
 const props = defineProps<Props>()
 
 const { focusNoteNameInput, notesState } = useNotesApp()
+const { getNoteFolders } = useNoteFolders()
 
 const {
   selectFirstNote,
@@ -158,6 +160,8 @@ async function onRemoveFromFolder() {
   else {
     await updateNote(props.note.id, { folderId: null })
   }
+
+  void getNoteFolders(false)
 
   if (
     notesState.folderId !== undefined

@@ -748,6 +748,29 @@ function isNoteListMembershipAffecting(data: NotesUpdate) {
 
 function patchNoteInCollections(noteId: number, data: NotesUpdate) {
   const now = Date.now()
+  const isRemovedByDeleteState
+    = (data.isDeleted === 1
+      && notesState.libraryFilter !== LibraryFilter.Trash
+      && notesState.libraryFilter !== LibraryFilter.TasksTrash)
+    || (data.isDeleted === 0
+      && (notesState.libraryFilter === LibraryFilter.Trash
+        || notesState.libraryFilter === LibraryFilter.TasksTrash))
+  const isRemovedByFavoritesState
+    = data.isFavorites === 0
+      && (notesState.libraryFilter === LibraryFilter.Favorites
+        || notesState.libraryFilter === LibraryFilter.TasksFavorites)
+  const isRemovedByFolderState
+    = (data.folderId !== undefined
+      && notesState.folderId !== undefined
+      && data.folderId !== notesState.folderId)
+    || (data.folderId !== undefined
+      && data.folderId !== null
+      && !notesState.folderId
+      && !notesState.tagId
+      && (notesState.libraryFilter === LibraryFilter.Inbox
+        || notesState.libraryFilter === LibraryFilter.TasksInbox))
+  const shouldRemoveFromCurrentList
+    = isRemovedByDeleteState || isRemovedByFavoritesState || isRemovedByFolderState
 
   function apply(collection?: NotesResponse) {
     if (!collection) {
@@ -759,12 +782,21 @@ function patchNoteInCollections(noteId: number, data: NotesUpdate) {
       return collection
     }
 
+    if (shouldRemoveFromCurrentList) {
+      return collection.filter(n => n.id !== noteId)
+    }
+
     const next = [...collection]
     next[index] = {
       ...next[index],
       ...(data.name !== undefined ? { name: data.name } : {}),
       ...(data.description !== undefined
         ? { description: data.description }
+        : {}),
+      ...(data.folderId === null ? { folder: null } : {}),
+      ...(data.isDeleted !== undefined ? { isDeleted: data.isDeleted } : {}),
+      ...(data.isFavorites !== undefined
+        ? { isFavorites: data.isFavorites }
         : {}),
       updatedAt: now,
     }
@@ -782,6 +814,11 @@ function patchNoteInCollections(noteId: number, data: NotesUpdate) {
       ...(data.description !== undefined
         ? { description: data.description }
         : {}),
+      ...(data.folderId === null ? { folder: null } : {}),
+      ...(data.isDeleted !== undefined ? { isDeleted: data.isDeleted } : {}),
+      ...(data.isFavorites !== undefined
+        ? { isFavorites: data.isFavorites }
+        : {}),
       updatedAt: now,
     }
     selectedNoteRecord.value = updatedRecord
@@ -791,21 +828,33 @@ function patchNoteInCollections(noteId: number, data: NotesUpdate) {
 }
 
 async function updateNote(noteId: number, data: NotesUpdate) {
+  const previousNoteId = notesState.noteId
+
   markPersistedStorageMutation()
+  patchNoteInCollections(noteId, data)
+  selectFirstNoteIfCurrentSelectionIsMissing(previousNoteId)
+
   await api.notes.patchNotesById(String(noteId), data)
 
   if (isNoteListMembershipAffecting(data)) {
     await getNotes(queryByLibraryOrFolderOrSearch.value)
-    await refreshSelectedNote()
-    return
+    selectFirstNoteIfCurrentSelectionIsMissing(previousNoteId)
+    if (notesState.noteId === previousNoteId && previousNoteId !== undefined) {
+      await refreshSelectedNote()
+    }
   }
-
-  // Переименование/описание не меняют состав списка — обновляем точечно.
-  patchNoteInCollections(noteId, data)
 }
 
 async function updateNotes(noteIds: number[], data: NotesUpdate[]) {
+  const previousNoteId = notesState.noteId
+
   markPersistedStorageMutation()
+  noteIds.forEach((noteId, index) => {
+    if (data[index]) {
+      patchNoteInCollections(noteId, data[index])
+    }
+  })
+  selectFirstNoteIfCurrentSelectionIsMissing(previousNoteId)
 
   // Ошибка одного элемента (например 503 на pending-записи) не прерывает
   // batch: остальные применяются, список обновляется в любом случае, о
@@ -822,7 +871,10 @@ async function updateNotes(noteIds: number[], data: NotesUpdate[]) {
   })
 
   await getNotes(queryByLibraryOrFolderOrSearch.value)
-  await refreshSelectedNote()
+  selectFirstNoteIfCurrentSelectionIsMissing(previousNoteId)
+  if (notesState.noteId === previousNoteId && previousNoteId !== undefined) {
+    await refreshSelectedNote()
+  }
 }
 
 async function updateNoteProperties(

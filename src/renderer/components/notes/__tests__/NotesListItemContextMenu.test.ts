@@ -31,6 +31,7 @@ vi.mock('@/composables', () => ({
   NoteTaskStatus,
   useDialog: () => ({ confirm: vi.fn() }),
   useDonations: () => ({ incrementCopy: vi.fn() }),
+  useNoteFolders: () => ({ getNoteFolders: vi.fn() }),
   useNotes: () => ({
     selectFirstNote: mocks.selectFirstNote,
     selectedNoteIds: mocks.selectedNoteIds,

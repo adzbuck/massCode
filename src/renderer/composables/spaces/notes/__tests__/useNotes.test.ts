@@ -711,6 +711,35 @@ describe('useNotes', () => {
       propertyType: 'task',
     })
   })
+
+  it('optimistically removes a note from the current folder list before patchNotesById resolves', async () => {
+    const context = await setup({
+      folderId: 5,
+      noteId: 1,
+      nextNotes: [{ id: 2 }],
+    })
+    const { notes, updateNote } = context.useNotes()
+    notes.value = [
+      { id: 1, folder: { id: 5, name: 'Work' } } as any,
+      { id: 2, folder: { id: 5, name: 'Work' } } as any,
+    ]
+
+    let resolvePatch!: () => void
+    context.patchNotesById.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          resolvePatch = resolve
+        }),
+    )
+
+    const updatePromise = updateNote(1, { folderId: null })
+
+    expect(notes.value?.map((n: any) => n.id)).toEqual([2])
+    expect(context.notesState.noteId).toBe(2)
+
+    resolvePatch()
+    await updatePromise
+  })
 })
 
 it('retains the cleanup receipt when the native mutation succeeds but refresh fails', async () => {

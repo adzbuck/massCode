@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import * as ContextMenu from '@/components/ui/shadcn/context-menu'
-import { useNotes, useNotesApp } from '@/composables'
+import { useNoteFolders, useNotes, useNotesApp } from '@/composables'
 import { useNotesWorkspaceNavigation } from '@/composables/spaces/notes/useNotesWorkspaceNavigation'
 import { LibraryFilter } from '@/composables/types'
 import { i18n } from '@/electron'
@@ -16,6 +16,7 @@ import {
 import { useRoute } from 'vue-router'
 
 const { notesCreateKind, notesState } = useNotesApp()
+const { getNoteFolders } = useNoteFolders()
 const { emptyTrash, selectFirstNote, updateNotes } = useNotes()
 const { openNotesLibrary } = useNotesWorkspaceNavigation()
 const route = useRoute()
@@ -108,6 +109,7 @@ async function onDrop(item: (typeof libraryItems)[number], event: DragEvent) {
       noteIds,
       noteIds.map(() => ({ folderId: null, isDeleted: 0 })),
     )
+    void getNoteFolders(false)
     selectFirstNote()
     return
   }
@@ -126,6 +128,7 @@ async function onDrop(item: (typeof libraryItems)[number], event: DragEvent) {
       noteIds,
       noteIds.map(() => ({ folderId: null, isDeleted: 1 })),
     )
+    void getNoteFolders(false)
     selectFirstNote()
   }
 }

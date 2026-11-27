@@ -6,7 +6,8 @@ import { useNoteSearch } from './useNoteSearch'
 type Position = 'after' | 'before' | 'center'
 
 export function useNoteFolderDragDrop() {
-  const { folders, updateNoteFolder, getFolderByIdFromTree } = useNoteFolders()
+  const { folders, getNoteFolders, updateNoteFolder, getFolderByIdFromTree }
+    = useNoteFolders()
   const { selectFirstNote, updateNotes } = useNotes()
   const { displayedNotes } = useNoteSearch()
 
@@ -115,6 +116,7 @@ export function useNoteFolderDragDrop() {
       matchedNotes.map(note => note.id),
       matchedNotes.map(() => ({ folderId, isDeleted: 0 })),
     )
+    void getNoteFolders(false)
     selectFirstNote()
   }
 
