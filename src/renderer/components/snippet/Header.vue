@@ -125,7 +125,7 @@ function onKeydown(event: KeyboardEvent) {
         <Trash2 class="h-4 w-4" />
       </UiActionButton>
       <UiActionButton
-        v-if="!searchQuery && !isSearch"
+        v-if="!searchQuery && !isSearch && !isViewingTrash"
         :tooltip="i18n.t('action.new.snippet')"
         shortcut="CommandOrControl+N"
         @click="createSnippetAndSelect"

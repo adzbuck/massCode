@@ -156,7 +156,7 @@ function onKeydown(event: KeyboardEvent) {
         <Trash2 class="h-4 w-4" />
       </UiActionButton>
       <UiActionButton
-        v-if="!searchQuery && !isSearch"
+        v-if="!searchQuery && !isSearch && !isViewingTrash"
         :tooltip="createActionTooltip"
         :shortcut="
           notesCreateKind === 'task'
@@ -168,7 +168,7 @@ function onKeydown(event: KeyboardEvent) {
         <Plus class="h-4 w-4" />
       </UiActionButton>
       <Popover.Popover
-        v-if="!searchQuery && !isSearch"
+        v-if="!searchQuery && !isSearch && !isViewingTrash"
         v-model:open="isCreateMenuOpen"
       >
         <Popover.PopoverTrigger as-child>
