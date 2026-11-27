@@ -712,6 +712,30 @@ describe('useNotes', () => {
     })
   })
 
+  it('filters out tasks in Notes Inbox and filters out notes in Tasks Inbox on the client', async () => {
+    const notesInboxCtx = await setup({
+      libraryFilter: 'inbox',
+      nextNotes: [
+        { id: 1, name: 'Regular Note', properties: {} } as any,
+        { id: 2, name: 'Inbox Task', properties: { type: 'task', status: 'todo' } } as any,
+      ],
+    })
+    const notesInbox = notesInboxCtx.useNotes()
+    await notesInbox.getNotes()
+    expect(notesInbox.notes.value?.map((n: any) => n.id)).toEqual([1])
+
+    const tasksInboxCtx = await setup({
+      libraryFilter: 'tasksInbox',
+      nextNotes: [
+        { id: 1, name: 'Regular Note', properties: {} } as any,
+        { id: 2, name: 'Inbox Task', properties: { type: 'task', status: 'todo' } } as any,
+      ],
+    })
+    const tasksInbox = tasksInboxCtx.useNotes()
+    await tasksInbox.getNotes()
+    expect(tasksInbox.notes.value?.map((n: any) => n.id)).toEqual([2])
+  })
+
   it('optimistically removes a note from the current folder list before patchNotesById resolves', async () => {
     const context = await setup({
       folderId: 5,

@@ -466,6 +466,28 @@ function hasDisplayedNote(noteId: number): boolean {
   return source?.some(note => note.id === noteId) ?? false
 }
 
+function matchesNoteTypeQuery(
+  note: NoteRecord,
+  query: NotesQuery,
+): boolean {
+  if (
+    query.propertyTypeNot !== undefined
+    && note.properties?.type === query.propertyTypeNot
+  ) {
+    return false
+  }
+
+  if (
+    query.propertyType !== undefined
+    && note.properties !== undefined
+    && note.properties.type !== query.propertyType
+  ) {
+    return false
+  }
+
+  return true
+}
+
 function selectFirstNoteIfCurrentSelectionIsMissing(previousNoteId?: number) {
   if (
     previousNoteId !== undefined
@@ -571,7 +593,9 @@ export async function getNotes(query?: NotesQuery) {
         return false
       }
 
-      const data = responseData as NotesResponse
+      const data = (responseData as NotesResponse).filter(note =>
+        matchesNoteTypeQuery(note, resolvedQuery),
+      )
 
       if (forSearch) {
         notesBySearch.value = data
