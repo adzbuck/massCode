@@ -1319,7 +1319,8 @@
     "add": {
       "description": "Add Description",
       "tag": "Add Tag",
-      "toFavorites": "Add to Favorites"
+      "toFavorites": "Add to Favorites",
+      "toToday": "Add to Today"
     },
     "open": {
       "storage": "Open Storage"
@@ -1330,7 +1331,8 @@
     },
     "remove": {
       "fromFavorites": "Remove from Favorites",
-      "fromFolder": "Remove from Folder"
+      "fromFolder": "Remove from Folder",
+      "fromToday": "Remove from Today"
     },
     "reveal": {
       "inFinder": "Reveal in Finder",

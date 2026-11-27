@@ -738,6 +738,44 @@ describe('useNotes', () => {
     })
   })
 
+  it('filters, sorts, and reorders tasks in tasksToday', async () => {
+    const todayCtx = await setup({
+      libraryFilter: 'tasksToday',
+      nextNotes: [
+        {
+          id: 1,
+          name: 'Task B',
+          createdAt: 100,
+          properties: { type: 'task', status: 'todo', today: true, todayOrder: 2 },
+        } as any,
+        {
+          id: 2,
+          name: 'Not Today',
+          createdAt: 200,
+          properties: { type: 'task', status: 'todo' },
+        } as any,
+        {
+          id: 3,
+          name: 'Task A',
+          createdAt: 300,
+          properties: { type: 'task', status: 'todo', today: true, todayOrder: 0 },
+        } as any,
+      ],
+    })
+    const todayNotes = todayCtx.useNotes()
+    await todayNotes.getNotes()
+    expect(todayNotes.notes.value?.map((n: any) => n.id)).toEqual([3, 1])
+
+    await todayNotes.reorderTodayTasks([1], 3, 'before')
+    expect(todayNotes.notes.value?.map((n: any) => n.id)).toEqual([1, 3])
+    expect(todayCtx.patchNotesByIdProperties).toHaveBeenCalledWith('1', {
+      properties: { today: true, todayOrder: 0 },
+    })
+    expect(todayCtx.patchNotesByIdProperties).toHaveBeenCalledWith('3', {
+      properties: { today: true, todayOrder: 1 },
+    })
+  })
+
   it('filters out tasks in Notes Inbox and filters out notes in Tasks Inbox on the client', async () => {
     const notesInboxCtx = await setup({
       libraryFilter: 'inbox',

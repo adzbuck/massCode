@@ -16,6 +16,7 @@ import {
   Inbox,
   ListTodo,
   Star,
+  Sun,
   Trash,
   Trash2,
 } from 'lucide-vue-next'
@@ -23,8 +24,13 @@ import { useRoute } from 'vue-router'
 
 const { notesCreateKind, notesState } = useNotesApp()
 const { getNoteFolders } = useNoteFolders()
-const { cleanupCompletedTasks, emptyTrash, selectFirstNote, updateNotes }
-  = useNotes()
+const {
+  cleanupCompletedTasks,
+  emptyTrash,
+  selectFirstNote,
+  setTasksToday,
+  updateNotes,
+} = useNotes()
 const { displayedNotes } = useNoteSearch()
 const { openNotesLibrary } = useNotesWorkspaceNavigation()
 const route = useRoute()
@@ -34,6 +40,11 @@ const taskItems = [
     id: LibraryFilter.TasksInbox,
     name: i18n.t('common.inbox'),
     icon: Inbox,
+  },
+  {
+    id: LibraryFilter.TasksToday,
+    name: i18n.t('notes.tasks.today'),
+    icon: Sun,
   },
   {
     id: LibraryFilter.TasksFavorites,
@@ -59,6 +70,7 @@ const itemRef = ref<HTMLElement>()
 function isDroppableItem(id: string) {
   return (
     id === LibraryFilter.TasksInbox
+    || id === LibraryFilter.TasksToday
     || id === LibraryFilter.TasksFavorites
     || id === LibraryFilter.TasksTrash
   )
@@ -158,6 +170,12 @@ async function onDrop(item: (typeof taskItems)[number], event: DragEvent) {
       noteIds.map(() => ({ folderId: null, isDeleted: 0 })),
     )
     void getNoteFolders(false)
+    selectFirstNote()
+    return
+  }
+
+  if (item.id === LibraryFilter.TasksToday) {
+    await setTasksToday(noteIds, true)
     selectFirstNote()
     return
   }

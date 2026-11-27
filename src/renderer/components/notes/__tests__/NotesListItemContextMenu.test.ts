@@ -1,4 +1,8 @@
-import { isTaskNote, NoteTaskStatus } from '@/composables/spaces/notes/taskProperties'
+import {
+  isTaskNote,
+  isTaskToday,
+  NoteTaskStatus,
+} from '@/composables/spaces/notes/taskProperties'
 import { LibraryFilter } from '@/composables/types'
 import { describe, expect, it, vi } from 'vitest'
 import {
@@ -12,6 +16,7 @@ import {
 const mocks = vi.hoisted(() => ({
   selectFirstNote: vi.fn(),
   selectedNoteIds: { value: [] as number[] },
+  setTasksToday: vi.fn(),
   updateNote: vi.fn(),
   updateNotes: vi.fn(),
   updateNoteProperties: vi.fn(),
@@ -31,6 +36,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@/composables', () => ({
   isTaskNote,
+  isTaskToday,
   NoteTaskStatus,
   useDialog: () => ({ confirm: vi.fn() }),
   useDonations: () => ({ incrementCopy: vi.fn() }),
@@ -40,6 +46,7 @@ vi.mock('@/composables', () => ({
     emptyTrash: vi.fn(),
     selectFirstNote: mocks.selectFirstNote,
     selectedNoteIds: mocks.selectedNoteIds,
+    setTasksToday: mocks.setTasksToday,
     updateNote: mocks.updateNote,
     updateNotes: mocks.updateNotes,
     updateNoteProperties: mocks.updateNoteProperties,

@@ -151,6 +151,7 @@ const libraryFilterLabels = computed<Record<string, string>>(() => ({
   [LibraryFilter.Favorites]: i18n.t('common.favorites'),
   [LibraryFilter.All]: i18n.t('spaces.notes.allNotes'),
   [LibraryFilter.TasksInbox]: i18n.t('common.inbox'),
+  [LibraryFilter.TasksToday]: i18n.t('notes.tasks.today'),
   [LibraryFilter.TasksFavorites]: i18n.t('common.favorites'),
   [LibraryFilter.Tasks]: i18n.t('notes.tasks.title'),
   [LibraryFilter.TasksTrash]: i18n.t('common.trash'),

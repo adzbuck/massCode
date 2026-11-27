@@ -7,6 +7,7 @@ import type {
 import * as ContextMenu from '@/components/ui/shadcn/context-menu'
 import {
   isTaskNote,
+  isTaskToday,
   NoteTaskStatus,
   useDialog,
   useDonations,
@@ -60,6 +61,7 @@ const { getNoteFolders } = useNoteFolders()
 const {
   selectFirstNote,
   selectedNoteIds,
+  setTasksToday,
   updateNote,
   updateNoteProperties,
   updateNotes,
@@ -77,6 +79,12 @@ const isFavoritesLibrarySelected = computed(
   () =>
     notesState.libraryFilter === LibraryFilter.Favorites
     || notesState.libraryFilter === LibraryFilter.TasksFavorites,
+)
+const isTasksTodayLibrarySelected = computed(
+  () => notesState.libraryFilter === LibraryFilter.TasksToday,
+)
+const isTodayTask = computed(
+  () => isTasksTodayLibrarySelected.value || isTaskToday(props.note),
 )
 
 const isTrashLibrarySelected = computed(
@@ -114,6 +122,26 @@ async function onAddFavorites() {
   }
 
   if (isFavoritesLibrarySelected.value) {
+    if (
+      selectedNoteIds.value.length > 1
+      || notesState.noteId === props.note.id
+    ) {
+      selectFirstNote()
+    }
+  }
+}
+
+async function onToggleToday() {
+  const nextIsToday = !isTodayTask.value
+  const targetIds
+    = selectedNoteIds.value.length > 1
+      && selectedNoteIds.value.includes(props.note.id)
+      ? selectedNoteIds.value
+      : [props.note.id]
+
+  await setTasksToday(targetIds, nextIsToday)
+
+  if (!nextIsToday && isTasksTodayLibrarySelected.value) {
     if (
       selectedNoteIds.value.length > 1
       || notesState.noteId === props.note.id
@@ -286,7 +314,7 @@ async function onConvertToNote() {
   }
 
   await updateNoteProperties(props.note.id, {
-    unset: ['type', 'status', 'priority', 'due'],
+    unset: ['type', 'status', 'priority', 'due', 'today', 'todayOrder'],
   })
 }
 </script>
@@ -302,6 +330,22 @@ async function onConvertToNote() {
           isFavoritesLibrarySelected
             ? i18n.t("action.remove.fromFavorites")
             : i18n.t("action.add.toFavorites")
+        }}
+      </ContextMenu.ContextMenuItem>
+      <ContextMenu.ContextMenuItem
+        v-if="isTask"
+        data-note-toggle-today
+        :disabled="isCloudPending"
+        @click="onToggleToday"
+      >
+        {{
+          isTodayTask
+            ? i18n.t("action.remove.fromToday", {
+              defaultValue: "Remove from Today",
+            })
+            : i18n.t("action.add.toToday", {
+              defaultValue: "Add to Today",
+            })
         }}
       </ContextMenu.ContextMenuItem>
       <ContextMenu.ContextMenuItem

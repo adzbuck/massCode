@@ -10,7 +10,12 @@ import { benchmarkStart } from '@/utils/benchmark'
 import { differenceInCalendarDays, parseISO, startOfToday } from 'date-fns'
 import { api } from '~/renderer/services/api'
 import { LibraryFilter } from '../../types'
-import { NoteTaskStatus, type NoteTaskStatusValue } from './taskProperties'
+import {
+  getTaskTodayOrder,
+  isTaskToday,
+  NoteTaskStatus,
+  type NoteTaskStatusValue,
+} from './taskProperties'
 import { useNoteContent } from './useNoteContent'
 import { useNotesApp } from './useNotesApp'
 import { isSearch, notesBySearch, searchQuery } from './useNoteSearch'
@@ -405,6 +410,9 @@ export function getLibraryFilterQuery(
   if (filter === LibraryFilter.TasksInbox) {
     return { isInbox: 1, propertyType: 'task' }
   }
+  if (filter === LibraryFilter.TasksToday) {
+    return { propertyType: 'task' }
+  }
   if (filter === LibraryFilter.TasksFavorites) {
     return { isFavorites: 1, propertyType: 'task' }
   }
@@ -561,6 +569,15 @@ function matchesNoteTypeQuery(
   }
 
   if (
+    !notesState.folderId
+    && !notesState.tagId
+    && notesState.libraryFilter === LibraryFilter.TasksToday
+    && !isTaskToday(note)
+  ) {
+    return false
+  }
+
+  if (
     query.propertyDue !== undefined
     && note.properties !== undefined
     && RELATIVE_DUE_FILTER_RE.test(query.propertyDue)
@@ -703,6 +720,18 @@ export async function getNotes(query?: NotesQuery) {
         matchesNoteTypeQuery(note, resolvedQuery),
       )
 
+      if (
+        !notesState.folderId
+        && !notesState.tagId
+        && notesState.libraryFilter === LibraryFilter.TasksToday
+      ) {
+        data.sort(
+          (a, b) =>
+            getTaskTodayOrder(a) - getTaskTodayOrder(b)
+            || b.createdAt - a.createdAt,
+        )
+      }
+
       if (forSearch) {
         notesBySearch.value = data
       }
@@ -785,10 +814,15 @@ async function createTaskAndSelect(payload?: CreateNotePayload) {
       ? (LIBRARY_FILTER_REQUIRED_TASK_STATUS[notesState.libraryFilter]
         ?? NoteTaskStatus.Todo)
       : NoteTaskStatus.Todo
+  const isTasksTodaySelected
+    = !notesState.folderId
+      && !notesState.tagId
+      && notesState.libraryFilter === LibraryFilter.TasksToday
   await createNoteWithPayloadAndSelect({
     ...payload,
     properties: {
       status: defaultStatus,
+      ...(isTasksTodaySelected ? { today: true } : {}),
       ...payload?.properties,
       type: 'task',
     },
@@ -1045,6 +1079,162 @@ async function updateNoteProperties(
   if (notesState.noteId === previousNoteId) {
     await refreshSelectedNote()
   }
+}
+
+async function setTasksToday(noteIds: number[], isToday: boolean) {
+  if (!noteIds.length) {
+    return
+  }
+
+  const previousNoteId = notesState.noteId
+  const uniqueIds = Array.from(new Set(noteIds))
+  const source = isSearch.value ? notesBySearch.value : notes.value
+  const maxExistingOrder = (source ?? []).reduce((max, item) => {
+    const order = getTaskTodayOrder(item)
+    return order < Number.MAX_SAFE_INTEGER ? Math.max(max, order) : max
+  }, -1)
+
+  const orderById = new Map<number, number>()
+  uniqueIds.forEach((id, idx) => {
+    orderById.set(id, maxExistingOrder + 1 + idx)
+  })
+
+  const shouldRemoveFromCurrentList
+    = !isToday
+      && !notesState.folderId
+      && !notesState.tagId
+      && notesState.libraryFilter === LibraryFilter.TasksToday
+
+  function applyTodayToCollection(collection?: NotesResponse) {
+    if (!collection) {
+      return collection
+    }
+
+    if (shouldRemoveFromCurrentList) {
+      return collection.filter(n => !orderById.has(n.id))
+    }
+
+    return collection.map((item) => {
+      if (!orderById.has(item.id)) {
+        return item
+      }
+
+      const nextProperties = { ...item.properties }
+      if (isToday) {
+        nextProperties.today = true
+        if (getTaskTodayOrder(item) === Number.MAX_SAFE_INTEGER) {
+          nextProperties.todayOrder = orderById.get(item.id)!
+        }
+      }
+      else {
+        delete nextProperties.today
+        delete nextProperties.todayOrder
+      }
+
+      return {
+        ...item,
+        properties: nextProperties,
+      }
+    })
+  }
+
+  notes.value = applyTodayToCollection(notes.value)
+  notesBySearch.value = applyTodayToCollection(notesBySearch.value)
+  selectFirstNoteIfCurrentSelectionIsMissing(previousNoteId)
+
+  markPersistedStorageMutation()
+  await Promise.allSettled(
+    uniqueIds.map(id =>
+      api.notes.patchNotesByIdProperties(
+        String(id),
+        isToday
+          ? {
+              properties: {
+                today: true,
+                todayOrder: orderById.get(id)!,
+                type: 'task',
+              },
+            }
+          : {
+              unset: ['today', 'todayOrder'],
+            },
+      ),
+    ),
+  )
+
+  await getNotes(queryByLibraryOrFolderOrSearch.value)
+  selectFirstNoteIfCurrentSelectionIsMissing(previousNoteId)
+  if (notesState.noteId === previousNoteId && previousNoteId !== undefined) {
+    await refreshSelectedNote()
+  }
+}
+
+async function reorderTodayTasks(
+  draggedIds: number[],
+  targetId: number,
+  position: 'before' | 'after',
+) {
+  const source = isSearch.value ? notesBySearch.value : notes.value
+  if (!source?.length || !draggedIds.length || draggedIds.includes(targetId)) {
+    return
+  }
+
+  const draggedSet = new Set(draggedIds)
+  const draggedItems = source.filter(item => draggedSet.has(item.id))
+  if (!draggedItems.length) {
+    return
+  }
+
+  const remaining = source.filter(item => !draggedSet.has(item.id))
+  const targetIndex = remaining.findIndex(item => item.id === targetId)
+  if (targetIndex === -1) {
+    return
+  }
+
+  const insertIndex = position === 'before' ? targetIndex : targetIndex + 1
+  const reordered = [
+    ...remaining.slice(0, insertIndex),
+    ...draggedItems,
+    ...remaining.slice(insertIndex),
+  ]
+
+  const changedNotes: Array<{ id: number, order: number }> = []
+  const nextList = reordered.map((item, index) => {
+    if (getTaskTodayOrder(item) !== index) {
+      changedNotes.push({ id: item.id, order: index })
+    }
+    return {
+      ...item,
+      properties: {
+        ...item.properties,
+        today: true,
+        todayOrder: index,
+      },
+    }
+  })
+
+  if (isSearch.value) {
+    notesBySearch.value = nextList
+  }
+  else {
+    notes.value = nextList
+  }
+
+  if (!changedNotes.length) {
+    return
+  }
+
+  markPersistedStorageMutation()
+  await Promise.allSettled(
+    changedNotes.map(({ id, order }) =>
+      api.notes.patchNotesByIdProperties(String(id), {
+        properties: {
+          today: true,
+          todayOrder: order,
+        },
+      }),
+    ),
+  )
 }
 
 async function deleteNote(noteId: number) {
@@ -1376,6 +1566,7 @@ export function useNotes() {
     lastSelectedNoteId,
     notes,
     refreshSelectedNote,
+    reorderTodayTasks,
     retrySelectedNote,
     selectedNoteRecordStatus,
     selectedNote,
@@ -1383,6 +1574,7 @@ export function useNotes() {
     selectedNotes,
     selectFirstNote,
     selectNote,
+    setTasksToday,
     updateNote,
     updateNoteProperties,
     updateNotes,

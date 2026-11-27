@@ -10,6 +10,7 @@ export const LibraryFilter = {
   Tasks: 'tasks',
   TasksFavorites: 'tasksFavorites',
   TasksInbox: 'tasksInbox',
+  TasksToday: 'tasksToday',
   TasksTrash: 'tasksTrash',
   Today: 'today',
   Todo: 'todo',

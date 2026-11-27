@@ -47,6 +47,26 @@ export function isTaskNote(note: NoteWithProperties | undefined | null) {
   return getNotePropertyString(note?.properties, 'type') === 'task'
 }
 
+export function isTaskToday(
+  note: NoteWithProperties | undefined | null,
+): boolean {
+  const value = note?.properties?.today
+  return (
+    value === true
+    || value === 'true'
+    || value === 1
+    || value === '1'
+  )
+}
+
+export function getTaskTodayOrder(
+  note: NoteWithProperties | undefined | null,
+): number {
+  const raw = note?.properties?.todayOrder
+  const parsed = typeof raw === 'number' ? raw : Number(raw)
+  return Number.isFinite(parsed) ? parsed : Number.MAX_SAFE_INTEGER
+}
+
 export function getTaskStatus(
   note: NoteWithProperties | undefined | null,
 ): NoteTaskStatusValue {

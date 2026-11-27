@@ -14,10 +14,11 @@ import {
   useNotesApp,
   useNoteSearch,
 } from '@/composables'
+import { LibraryFilter } from '@/composables/types'
 import { useDateFormat } from '@/composables/useDateFormat'
 import { i18n } from '@/electron'
 import { isPast, isToday, isValid, parseISO } from 'date-fns'
-import { CalendarClock, CloudDownload, Flag } from 'lucide-vue-next'
+import { CalendarClock, CloudDownload, Flag, GripVertical } from 'lucide-vue-next'
 import { getTaskPriorityFlagClass } from './taskPriorityStyle'
 
 interface NoteTagInfo {
@@ -57,8 +58,21 @@ const { recordNavigation } = useNavigationHistory()
 const { highlightedNoteIds, highlightedFolderIds, focusedNoteId, notesState }
   = useNotesApp()
 
-const { selectNote, selectedNoteIds, updateNoteProperties } = useNotes()
+const {
+  reorderTodayTasks,
+  selectNote,
+  selectedNoteIds,
+  updateNoteProperties,
+} = useNotes()
 const { displayedNotes } = useNoteSearch()
+
+const isSortableTodayList = computed(
+  () =>
+    !notesState.folderId
+    && !notesState.tagId
+    && notesState.libraryFilter === LibraryFilter.TasksToday,
+)
+const dropPosition = ref<'before' | 'after'>()
 
 const isSelected = computed(() => notesState.noteId === props.note.id)
 
@@ -203,6 +217,82 @@ function onDragStart(event: DragEvent) {
 
   setTimeout(() => el.remove(), 0)
 }
+
+function parseDroppedNoteIds(dataTransfer: DataTransfer | null): number[] {
+  if (!dataTransfer) {
+    return []
+  }
+
+  try {
+    const parsed = JSON.parse(dataTransfer.getData('noteIds') || '[]')
+    if (Array.isArray(parsed)) {
+      return parsed
+        .map(id => Number(id))
+        .filter(id => Number.isFinite(id))
+    }
+  }
+  catch {
+    // ignore malformed drag payload
+  }
+
+  return []
+}
+
+function onDragOverItem(event: DragEvent) {
+  if (!isSortableTodayList.value) {
+    return
+  }
+
+  const types = event.dataTransfer?.types
+  if (
+    types?.includes('application/x-masscode-note')
+    && !types?.includes('application/x-masscode-task')
+  ) {
+    return
+  }
+
+  event.preventDefault()
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = 'move'
+  }
+
+  const target = event.currentTarget as HTMLElement | null
+  if (!target) {
+    return
+  }
+
+  const rect = target.getBoundingClientRect()
+  const midpoint = rect.top + rect.height / 2
+  dropPosition.value = event.clientY < midpoint ? 'before' : 'after'
+}
+
+function onDragLeaveItem(event: DragEvent) {
+  const currentTarget = event.currentTarget as HTMLElement | null
+  const relatedTarget = event.relatedTarget as Node | null
+  if (currentTarget && relatedTarget && currentTarget.contains(relatedTarget)) {
+    return
+  }
+  dropPosition.value = undefined
+}
+
+async function onDropItem(event: DragEvent) {
+  const position = dropPosition.value
+  dropPosition.value = undefined
+
+  if (!isSortableTodayList.value || !position) {
+    return
+  }
+
+  event.preventDefault()
+  event.stopPropagation()
+
+  const draggedIds = parseDroppedNoteIds(event.dataTransfer)
+  if (!draggedIds.length || draggedIds.includes(props.note.id)) {
+    return
+  }
+
+  await reorderTodayTasks(draggedIds, props.note.id, position)
+}
 </script>
 
 <template>
@@ -214,11 +304,17 @@ function onDragStart(event: DragEvent) {
       'is-multi-selected': isInMultiSelection,
       'is-focused': isFocused,
       'is-highlighted': isHighlighted,
+      'border-t-primary border-t-2': dropPosition === 'before',
+      'border-b-primary! border-b-2': dropPosition === 'after',
     }"
     :draggable="!note.pendingCloudDownload"
     @click="(event) => onNoteClick(note.id, event)"
     @contextmenu="onClickContextMenu"
     @dragstart.stop="onDragStart"
+    @dragend="dropPosition = undefined"
+    @dragover="onDragOverItem"
+    @dragleave="onDragLeaveItem"
+    @drop="onDropItem"
   >
     <ContextMenu.ContextMenu>
       <ContextMenu.ContextMenuTrigger>
@@ -234,6 +330,10 @@ function onDragStart(event: DragEvent) {
             class="flex min-w-0 items-center gap-2 overflow-hidden"
             :class="isCompactListMode ? 'flex-1' : 'mb-2'"
           >
+            <GripVertical
+              v-if="isSortableTodayList"
+              class="text-muted-foreground/60 size-3.5 shrink-0 cursor-grab"
+            />
             <Checkbox
               v-if="isTask"
               :model-value="isTaskDone"

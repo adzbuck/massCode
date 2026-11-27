@@ -61,6 +61,7 @@ const isViewingTasks = computed(
     && !notesState.tagId
     && (notesState.libraryFilter === LibraryFilter.Tasks
       || notesState.libraryFilter === LibraryFilter.TasksInbox
+      || notesState.libraryFilter === LibraryFilter.TasksToday
       || notesState.libraryFilter === LibraryFilter.TasksFavorites),
 )
 
