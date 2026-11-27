@@ -43,6 +43,7 @@ async function setup(options: SetupOptions = {}) {
   const nextNotes = options.nextNotes ?? [{ id: 2 }]
   const markPersistedStorageMutation = vi.fn()
   const patchNotesByIdProperties = vi.fn(async () => undefined)
+  const deleteNotesTrash = vi.fn(async () => undefined)
   const postNotesTasksCleanup = vi.fn(async () => ({ data: { count: 1 } }))
   const getNotes = vi.fn(async () => ({ data: nextNotes }))
   const getNotesById = vi.fn(async (id: string) => ({
@@ -104,7 +105,7 @@ async function setup(options: SetupOptions = {}) {
     api: {
       notes: {
         deleteNotesById: vi.fn(),
-        deleteNotesTrash: vi.fn(),
+        deleteNotesTrash,
         deleteNotesByIdTagsByTagId: vi.fn(),
         getNotes,
         getNotesById,
@@ -143,6 +144,7 @@ async function setup(options: SetupOptions = {}) {
   const { selectedNoteIds, useNotes } = await import('../useNotes')
 
   return {
+    deleteNotesTrash,
     invoke,
     getNotes,
     getNotesById,
@@ -502,6 +504,21 @@ describe('useNotes', () => {
       message: 'notes.tasks.cleanupDone',
       type: 'success',
     })
+  })
+
+  it('clears the selected note when emptying trash leaves no notes', async () => {
+    const context = await setup({
+      libraryFilter: 'trash',
+      nextNotes: [],
+      noteId: 1,
+    })
+
+    await context.useNotes().emptyTrash()
+
+    expect(context.deleteNotesTrash).toHaveBeenCalledOnce()
+    expect(context.getNotes).toHaveBeenCalledWith({ isDeleted: 1 })
+    expect(context.notesState.noteId).toBeUndefined()
+    expect(context.selectedNoteIds.value).toEqual([])
   })
 })
 

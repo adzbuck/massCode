@@ -898,6 +898,7 @@ async function emptyTrash() {
   if (isConfirmed) {
     await api.snippets.deleteSnippetsTrash()
     await getSnippets(queryByLibraryOrFolderOrSearch.value)
+    selectFirstSnippet()
   }
 }
 

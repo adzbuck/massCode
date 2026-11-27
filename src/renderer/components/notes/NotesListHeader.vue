@@ -18,10 +18,11 @@ import {
   MoreHorizontal,
   Plus,
   Search,
+  Trash2,
   X,
 } from 'lucide-vue-next'
 
-const { isSearch, createNoteBySelectedKindAndSelect } = useNotes()
+const { isSearch, createNoteBySelectedKindAndSelect, emptyTrash } = useNotes()
 const {
   searchQuery,
   clearSearch,
@@ -34,6 +35,13 @@ const { isFocusedSearch, notesCreateKind, notesState } = useNotesApp()
 const { folders, getFolderByIdFromTree } = useNoteFolders()
 const { tags } = useNoteTags()
 const isCreateMenuOpen = ref(false)
+
+const isViewingTrash = computed(
+  () =>
+    !notesState.folderId
+    && !notesState.tagId
+    && notesState.libraryFilter === LibraryFilter.Trash,
+)
 
 const libraryFilterLabels = computed<Record<string, string>>(() => ({
   [LibraryFilter.Inbox]: i18n.t('common.inbox'),
@@ -139,7 +147,16 @@ function onKeydown(event: KeyboardEvent) {
         <X class="h-4 w-4" />
       </UiActionButton>
       <UiActionButton
-        v-else-if="!isSearch"
+        v-if="isViewingTrash"
+        data-notes-empty-trash
+        :disabled="!displayedNotes?.length"
+        :tooltip="i18n.t('action.delete.trash')"
+        @click="emptyTrash"
+      >
+        <Trash2 class="h-4 w-4" />
+      </UiActionButton>
+      <UiActionButton
+        v-if="!searchQuery && !isSearch"
         :tooltip="createActionTooltip"
         :shortcut="
           notesCreateKind === 'task'

@@ -2,7 +2,9 @@
 import type { SnippetsQuery } from '~/renderer/services/api/generated'
 import { useApp, useFolders, useSnippets } from '@/composables'
 import { LibraryFilter } from '@/composables/types'
+import { i18n } from '@/electron'
 import { onClickOutside } from '@vueuse/core'
+import { Trash2 } from 'lucide-vue-next'
 
 const props = defineProps<Props>()
 
@@ -15,8 +17,13 @@ interface Props {
 const { state } = useApp()
 const { clearFolderSelection } = useFolders()
 
-const { getSnippets, selectFirstSnippet, clearSearch, isRestoreStateBlocked }
-  = useSnippets()
+const {
+  getSnippets,
+  selectFirstSnippet,
+  clearSearch,
+  emptyTrash,
+  isRestoreStateBlocked,
+} = useSnippets()
 
 const isFocused = ref(false)
 const itemRef = ref<HTMLElement>()
@@ -63,18 +70,27 @@ onClickOutside(itemRef, () => {
     data-sidebar-item
     :data-selected="isSelected ? 'true' : undefined"
     :data-focused="isFocused ? 'true' : undefined"
-    class="data-[selected=true]:bg-accent data-[focused=true]:bg-primary! data-[focused=true]:text-primary-foreground rounded-md"
+    class="group data-[selected=true]:bg-accent data-[focused=true]:bg-primary! data-[focused=true]:text-primary-foreground rounded-md"
     :class="{ 'hover:bg-accent-hover': !isSelected && !isFocused }"
     @click="onItemClick(id)"
   >
     <div class="ml-5.5 flex items-center">
       <component
         :is="icon"
-        class="mr-0.5 h-4 w-4"
+        class="mr-0.5 h-4 w-4 shrink-0"
       />
-      <div class="ml-1 select-none">
+      <div class="ml-1 min-w-0 flex-1 truncate select-none">
         {{ name }}
       </div>
+      <UiActionButton
+        v-if="id === LibraryFilter.Trash"
+        data-snippets-sidebar-empty-trash
+        :tooltip="i18n.t('action.delete.trash')"
+        class="mr-0.5 h-5 w-5 opacity-0 group-hover:opacity-100 group-data-[selected=true]:opacity-100 group-data-[focused=true]:text-inherit group-data-[focused=true]:opacity-100 [&_svg:not([class*='size-'])]:size-3.5"
+        @click.stop="emptyTrash"
+      >
+        <Trash2 class="size-3.5" />
+      </UiActionButton>
     </div>
   </div>
 </template>
