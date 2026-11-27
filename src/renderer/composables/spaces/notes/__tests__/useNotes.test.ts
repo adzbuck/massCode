@@ -143,7 +143,9 @@ async function setup(options: SetupOptions = {}) {
     searchQuery,
   }))
 
-  const { selectedNoteIds, useNotes } = await import('../useNotes')
+  const { selectedNoteIds, selectedNoteRecord, useNotes } = await import(
+    '../useNotes'
+  )
 
   return {
     invoke,
@@ -159,6 +161,7 @@ async function setup(options: SetupOptions = {}) {
     postNotesTasksCleanup,
     searchQuery,
     selectedNoteIds,
+    selectedNoteRecord,
     sonner,
     useNotes,
   }
@@ -301,19 +304,22 @@ describe('useNotes', () => {
 
   it('clears the selected and displayed note records when property updates leave the active list empty', async () => {
     const context = await setup({
+      libraryFilter: 'todo',
       nextNotes: [],
       noteId: 1,
     })
     const notes = context.useNotes()
+
     await notes.refreshSelectedNote()
     expect(notes.displayedNoteRecord.value?.id).toBe(1)
 
     await notes.updateNoteProperties(1, {
-      properties: { status: 'done' },
+      properties: { status: 'inProgress' },
     })
 
     expect(context.notesState.noteId).toBeUndefined()
     expect(context.selectedNoteIds.value).toEqual([])
+    expect(context.selectedNoteRecord.value).toBeUndefined()
     expect(notes.displayedNoteRecord.value).toBeUndefined()
     expect(notes.selectedNoteRecordStatus.value).toBe('idle')
   })
