@@ -80,6 +80,7 @@ const APP_STORE_DEFAULTS: AppStore = {
     route: 'notes-space',
     editorMode: 'livePreview',
     hideCompletedTasksInFolders: false,
+    tasksKanbanView: false,
     lastTasksCleanupAt: 0,
     dashboard: {
       widgets: {
@@ -93,6 +94,7 @@ const APP_STORE_DEFAULTS: AppStore = {
     layout: {
       mode: 'all-panels',
       tagsListHeight: LAYOUT_DEFAULTS.tags.height,
+      tasksExpanded: true,
     },
   },
   math: {
@@ -816,6 +818,10 @@ function sanitizeAppStore(value: unknown): AppStore {
         typeof notesSource.hideCompletedTasksInFolders === 'boolean'
           ? notesSource.hideCompletedTasksInFolders
           : APP_STORE_DEFAULTS.notes.hideCompletedTasksInFolders,
+      tasksKanbanView:
+        typeof notesSource.tasksKanbanView === 'boolean'
+          ? notesSource.tasksKanbanView
+          : APP_STORE_DEFAULTS.notes.tasksKanbanView,
       lastTasksCleanupAt: readNumber(
         notesSource,
         'lastTasksCleanupAt',
@@ -880,6 +886,7 @@ function sanitizeAppStore(value: unknown): AppStore {
           )
           return raw < 100 ? LAYOUT_DEFAULTS.tags.height : raw
         })(),
+        tasksExpanded: notesLayoutSource.tasksExpanded !== false,
         threePanel:
           readOptionalNumberArray(notesLayoutSource, 'threePanel')
           || readOptionalNumberArray(legacySizes, 'notesLayout'),

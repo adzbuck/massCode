@@ -87,4 +87,23 @@ describe('useNotesApp', () => {
     expect(notesApp.isNotesSidebarHidden.value).toBe(true)
     expect(notesApp.isNotesListHidden.value).toBe(true)
   })
+
+  it('tracks and persists tasks kanban view state', async () => {
+    const notesApp = await setup()
+
+    expect(notesApp.isTasksKanbanView.value).toBe(false)
+    expect(notesApp.isViewingTasks.value).toBe(false)
+    expect(notesApp.isTasksKanbanActive.value).toBe(false)
+
+    notesApp.notesState.libraryFilter = 'tasks'
+    expect(notesApp.isViewingTasks.value).toBe(true)
+    expect(notesApp.isTasksKanbanActive.value).toBe(false)
+
+    notesApp.toggleTasksKanbanView()
+    await nextTick()
+
+    expect(notesApp.isTasksKanbanView.value).toBe(true)
+    expect(notesApp.isTasksKanbanActive.value).toBe(true)
+    expect(storeSet).toHaveBeenCalledWith('notes.tasksKanbanView', true)
+  })
 })

@@ -5,6 +5,13 @@ export const NoteTaskStatus = {
   Todo: 'todo',
 } as const
 
+export const TASK_KANBAN_STATUSES = [
+  NoteTaskStatus.Todo,
+  NoteTaskStatus.InProgress,
+  NoteTaskStatus.Blocked,
+  NoteTaskStatus.Done,
+] as const
+
 export const NoteTaskPriority = {
   High: 'high',
   Low: 'low',
@@ -78,6 +85,28 @@ export function getTaskDue(
   return getNotePropertyString(note?.properties, 'due') || ''
 }
 
+export function isNoteTaskStatus(
+  value: unknown,
+): value is NoteTaskStatusValue {
+  return (
+    value === NoteTaskStatus.Todo
+    || value === NoteTaskStatus.InProgress
+    || value === NoteTaskStatus.Blocked
+    || value === NoteTaskStatus.Done
+  )
+}
+
+export function createTaskStatusPatch(
+  status: NoteTaskStatusValue,
+): NoteTaskPropertyPatch {
+  return {
+    properties: {
+      status,
+      type: 'task',
+    },
+  }
+}
+
 export function createTaskCompletionPatch(
   note: NoteWithProperties,
 ): NoteTaskPropertyPatch {
@@ -86,10 +115,26 @@ export function createTaskCompletionPatch(
       ? NoteTaskStatus.Todo
       : NoteTaskStatus.Done
 
-  return {
-    properties: {
-      status: nextStatus,
-      type: 'task',
-    },
+  return createTaskStatusPatch(nextStatus)
+}
+
+export function groupTasksByStatus<T extends NoteWithProperties>(
+  notes: readonly T[] | undefined | null,
+): Record<NoteTaskStatusValue, T[]> {
+  const grouped: Record<NoteTaskStatusValue, T[]> = {
+    [NoteTaskStatus.Todo]: [],
+    [NoteTaskStatus.InProgress]: [],
+    [NoteTaskStatus.Blocked]: [],
+    [NoteTaskStatus.Done]: [],
   }
+
+  for (const note of notes ?? []) {
+    if (!isTaskNote(note)) {
+      continue
+    }
+
+    grouped[getTaskStatus(note)].push(note)
+  }
+
+  return grouped
 }

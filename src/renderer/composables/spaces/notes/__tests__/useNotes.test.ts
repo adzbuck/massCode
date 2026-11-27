@@ -10,7 +10,9 @@ globalThis.watch = watch
 interface SetupOptions {
   confirmed?: boolean
   folderId?: number
+  hideCompletedTasksInFolders?: boolean
   isSearch?: boolean
+  isTasksKanbanActive?: boolean
   libraryFilter?: string
   nextNotes?: Array<{
     id: number
@@ -39,7 +41,10 @@ async function setup(options: SetupOptions = {}) {
   const notesCreateKind = ref<'note' | 'task'>('note')
   const isSearch = ref(options.isSearch ?? false)
   const searchQuery = ref(options.searchQuery ?? '')
-  const hideCompletedTasksInFolders = ref(false)
+  const hideCompletedTasksInFolders = ref(
+    options.hideCompletedTasksInFolders ?? false,
+  )
+  const isTasksKanbanActive = ref(options.isTasksKanbanActive ?? false)
   const nextNotes = options.nextNotes ?? [{ id: 2 }]
   const markPersistedStorageMutation = vi.fn()
   const patchNotesByIdProperties = vi.fn(async () => undefined)
@@ -129,6 +134,7 @@ async function setup(options: SetupOptions = {}) {
     useNotesApp: () => ({
       focusNoteNameInput: vi.fn(),
       hideCompletedTasksInFolders,
+      isTasksKanbanActive,
       notesCreateKind,
       notesState,
     }),
@@ -140,7 +146,9 @@ async function setup(options: SetupOptions = {}) {
     searchQuery,
   }))
 
-  const { selectedNoteIds, useNotes } = await import('../useNotes')
+  const { selectedNoteIds, selectedNoteRecord, useNotes } = await import(
+    '../useNotes'
+  )
 
   return {
     invoke,
@@ -156,6 +164,7 @@ async function setup(options: SetupOptions = {}) {
     postNotesTasksCleanup,
     searchQuery,
     selectedNoteIds,
+    selectedNoteRecord,
     sonner,
     useNotes,
   }
@@ -294,6 +303,28 @@ describe('useNotes', () => {
     })
     expect(context.notesState.noteId).toBe(2)
     expect(context.selectedNoteIds.value).toEqual([2])
+  })
+
+  it('clears the selected and displayed note records when property updates leave the active list empty', async () => {
+    const context = await setup({
+      libraryFilter: 'todo',
+      nextNotes: [],
+      noteId: 1,
+    })
+    const notes = context.useNotes()
+
+    await notes.refreshSelectedNote()
+    expect(notes.displayedNoteRecord.value?.id).toBe(1)
+
+    await notes.updateNoteProperties(1, {
+      properties: { status: 'inProgress' },
+    })
+
+    expect(context.notesState.noteId).toBeUndefined()
+    expect(context.selectedNoteIds.value).toEqual([])
+    expect(context.selectedNoteRecord.value).toBeUndefined()
+    expect(notes.displayedNoteRecord.value).toBeUndefined()
+    expect(notes.selectedNoteRecordStatus.value).toBe('idle')
   })
 
   it('keeps the current selection when property updates leave it in the active list', async () => {
@@ -464,6 +495,74 @@ describe('useNotes', () => {
     })
   })
 
+  it.each([
+    ['todo', { propertyStatus: 'todo', propertyType: 'task' }],
+    ['inProgress', { propertyStatus: 'inProgress', propertyType: 'task' }],
+    ['blocked', { propertyStatus: 'blocked', propertyType: 'task' }],
+  ] as const)('queries %s task status library filter', async (libraryFilter, expectedQuery) => {
+    const context = await setup({ libraryFilter })
+
+    await context.useNotes().getNotes()
+
+    expect(context.getNotes).toHaveBeenCalledWith(expectedQuery)
+  })
+
+  it.each([
+    ['todo', 'todo'],
+    ['inProgress', 'inProgress'],
+    ['blocked', 'blocked'],
+    ['completed', 'done'],
+  ] as const)(
+    'defaults new task status to %s and keeps the %s library filter when creating a task',
+    async (libraryFilter, expectedStatus) => {
+      const context = await setup({
+        libraryFilter,
+        nextNotes: [{ id: 7, folder: null, name: 'Created Task' }],
+      })
+
+      await context.useNotes().createTaskAndSelect()
+
+      expect(context.postNotes).toHaveBeenCalledWith(
+        expect.objectContaining({
+          properties: {
+            status: expectedStatus,
+            type: 'task',
+          },
+        }),
+      )
+      expect(context.notesState.libraryFilter).toBe(libraryFilter)
+      expect(context.notesState.noteId).toBe(7)
+    },
+  )
+
+  it.each(['inProgress', 'blocked', 'completed'] as const)(
+    'respects explicit status payload from createTaskStatusPatch and switches %s filter to Tasks when mismatched',
+    async (libraryFilter) => {
+      const { createTaskStatusPatch, NoteTaskStatus } = await import(
+        '../taskProperties'
+      )
+      const context = await setup({
+        libraryFilter,
+        nextNotes: [{ id: 7, folder: null, name: 'Created Task' }],
+      })
+
+      await context
+        .useNotes()
+        .createTaskAndSelect(createTaskStatusPatch(NoteTaskStatus.Todo))
+
+      expect(context.postNotes).toHaveBeenCalledWith(
+        expect.objectContaining({
+          properties: {
+            status: 'todo',
+            type: 'task',
+          },
+        }),
+      )
+      expect(context.notesState.libraryFilter).toBe('tasks')
+      expect(context.notesState.noteId).toBe(7)
+    },
+  )
+
   it('combines search with task library filters', async () => {
     const context = await setup({
       isSearch: true,
@@ -478,6 +577,48 @@ describe('useNotes', () => {
       propertyStatusNot: 'done',
       propertyType: 'task',
       search: 'release',
+    })
+  })
+
+  it('hides completed tasks in folders and the Tasks library filter when enabled, while keeping Completed intact', async () => {
+    const tasksContext = await setup({
+      hideCompletedTasksInFolders: true,
+      libraryFilter: 'tasks',
+    })
+    await tasksContext.useNotes().getNotes()
+    expect(tasksContext.getNotes).toHaveBeenCalledWith({
+      hideCompletedTasks: 1,
+      propertyType: 'task',
+    })
+
+    const folderContext = await setup({
+      folderId: 3,
+      hideCompletedTasksInFolders: true,
+    })
+    await folderContext.useNotes().getNotes()
+    expect(folderContext.getNotes).toHaveBeenCalledWith({
+      folderId: 3,
+      hideCompletedTasks: 1,
+    })
+
+    const completedContext = await setup({
+      hideCompletedTasksInFolders: true,
+      libraryFilter: 'completed',
+    })
+    await completedContext.useNotes().getNotes()
+    expect(completedContext.getNotes).toHaveBeenCalledWith({
+      propertyStatus: 'done',
+      propertyType: 'task',
+    })
+
+    const kanbanContext = await setup({
+      hideCompletedTasksInFolders: true,
+      isTasksKanbanActive: true,
+      libraryFilter: 'tasks',
+    })
+    await kanbanContext.useNotes().getNotes()
+    expect(kanbanContext.getNotes).toHaveBeenCalledWith({
+      propertyType: 'task',
     })
   })
 

@@ -57,7 +57,8 @@
       "descending": "Descending"
     },
     "compactMode": "Compact List",
-    "hideCompletedTasks": "Hide Completed Tasks"
+    "hideCompletedTasks": "Hide Completed Tasks",
+    "tasksKanban": "Tasks Kanban Board"
   },
   "edit": {
     "label": "Edit",

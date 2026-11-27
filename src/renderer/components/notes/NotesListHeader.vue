@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/shadcn/button'
 import * as Popover from '@/components/ui/shadcn/popover'
 import {
+  normalizeNotesSelectionState,
   useNoteFolders,
   useNotes,
   useNotesApp,
@@ -14,12 +15,22 @@ import { useDebounceFn } from '@vueuse/core'
 import {
   Check,
   FileText,
+  Kanban,
   ListTodo,
   MoreHorizontal,
   Plus,
   Search,
   X,
 } from 'lucide-vue-next'
+
+const props = withDefaults(
+  defineProps<{
+    embedded?: boolean
+  }>(),
+  {
+    embedded: false,
+  },
+)
 
 const { isSearch, createNoteBySelectedKindAndSelect } = useNotes()
 const {
@@ -30,10 +41,25 @@ const {
   selectSearchNote,
   displayedNotes,
 } = useNoteSearch()
-const { isFocusedSearch, notesCreateKind, notesState } = useNotesApp()
+const {
+  hideCompletedTasksInFolders,
+  isFocusedSearch,
+  notesCreateKind,
+  notesState,
+  isViewingTasks,
+  isTasksKanbanView,
+  toggleTasksKanbanView,
+} = useNotesApp()
 const { folders, getFolderByIdFromTree } = useNoteFolders()
 const { tags } = useNoteTags()
 const isCreateMenuOpen = ref(false)
+
+async function onToggleTasksKanbanView() {
+  toggleTasksKanbanView()
+  if (hideCompletedTasksInFolders.value) {
+    await normalizeNotesSelectionState()
+  }
+}
 
 const libraryFilterLabels = computed<Record<string, string>>(() => ({
   [LibraryFilter.Inbox]: i18n.t('common.inbox'),
@@ -42,6 +68,9 @@ const libraryFilterLabels = computed<Record<string, string>>(() => ({
   [LibraryFilter.Tasks]: i18n.t('notes.tasks.title'),
   [LibraryFilter.Today]: i18n.t('notes.tasks.today'),
   [LibraryFilter.Upcoming]: i18n.t('notes.tasks.upcoming'),
+  [LibraryFilter.Todo]: i18n.t('notes.tasks.status.todo'),
+  [LibraryFilter.InProgress]: i18n.t('notes.tasks.status.inProgress'),
+  [LibraryFilter.Blocked]: i18n.t('notes.tasks.status.blocked'),
   [LibraryFilter.Completed]: i18n.t('notes.tasks.completed'),
   [LibraryFilter.Trash]: i18n.t('common.trash'),
 }))
@@ -117,7 +146,13 @@ function onKeydown(event: KeyboardEvent) {
 </script>
 
 <template>
-  <div class="border-border mt-[var(--content-top-offset)] mb-2 border-b pb-1">
+  <div
+    :class="
+      props.embedded
+        ? 'min-w-0 flex-1'
+        : 'border-border mt-[var(--content-top-offset)] mb-2 border-b pb-1'
+    "
+  >
     <div class="flex items-center px-1">
       <Search class="text-muted-foreground ml-1 h-4 w-4 shrink-0" />
       <div class="min-w-0 flex-grow">
@@ -139,7 +174,22 @@ function onKeydown(event: KeyboardEvent) {
         <X class="h-4 w-4" />
       </UiActionButton>
       <UiActionButton
-        v-else-if="!isSearch"
+        v-if="isViewingTasks"
+        data-tasks-kanban-toggle
+        :active="isTasksKanbanView"
+        :tooltip="
+          i18n.t(
+            isTasksKanbanView
+              ? 'notes.tasks.listView'
+              : 'notes.tasks.kanbanView',
+          )
+        "
+        @click="onToggleTasksKanbanView"
+      >
+        <Kanban class="h-4 w-4" />
+      </UiActionButton>
+      <UiActionButton
+        v-if="!searchQuery && !isSearch"
         :tooltip="createActionTooltip"
         :shortcut="
           notesCreateKind === 'task'

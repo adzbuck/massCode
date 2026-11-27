@@ -4,6 +4,7 @@ import {
   isContentSortField,
   isContentSortOrder,
   isSortableContentSpaceId,
+  normalizeNotesSelectionState,
   useApp,
   useContentSort,
   useEditor,
@@ -16,9 +17,11 @@ import {
   useNotes,
   useNotesApp,
   useNotesEditor,
+  useNotesWorkspaceNavigation,
   useSnippets,
 } from '@/composables'
 import { useHttpPanels } from '@/composables/spaces/http/useHttpPanels'
+import { LibraryFilter } from '@/composables/types'
 import { useSpacePanels } from '@/composables/useSpacePanels'
 import { ipc } from '@/electron'
 import { navigateBack, navigateForward } from '@/ipc/listeners/deepLinks'
@@ -50,7 +53,11 @@ const {
   showNotesMindmap,
   showNotesPresentation,
   hideCompletedTasksInFolders,
+  isTasksKanbanView,
+  isViewingTasks,
+  toggleTasksKanbanView,
 } = useNotesApp()
+const { openNotesLibrary } = useNotesWorkspaceNavigation()
 const { setHttpLayoutMode, toggleHttpSidebar } = useHttpApp()
 const { executeCurrentRequest, isExecuting } = useHttpExecute()
 const { currentDraft, getHttpRequests } = useHttpRequests()
@@ -180,7 +187,24 @@ export function registerMainMenuListeners() {
     }
 
     hideCompletedTasksInFolders.value = !hideCompletedTasksInFolders.value
-    await getNotes()
+    await normalizeNotesSelectionState()
+  })
+
+  ipc.on('main-menu:toggle-tasks-kanban', async () => {
+    if (getActiveSpaceId() !== 'notes') {
+      return
+    }
+
+    if (!isViewingTasks.value) {
+      isTasksKanbanView.value = true
+      await openNotesLibrary(LibraryFilter.Tasks)
+      return
+    }
+
+    toggleTasksKanbanView()
+    if (hideCompletedTasksInFolders.value) {
+      await normalizeNotesSelectionState()
+    }
   })
 
   ipc.on('main-menu:goto-math-notebook', () => {

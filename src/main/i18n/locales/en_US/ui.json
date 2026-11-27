@@ -1053,6 +1053,10 @@
     },
     "tasks": {
       "title": "Tasks",
+      "kanbanView": "Kanban board",
+      "listView": "List view",
+      "emptyColumn": "No tasks",
+      "moveTo": "Move to",
       "today": "Today",
       "upcoming": "Upcoming",
       "completed": "Completed",

@@ -57,7 +57,8 @@
       "descending": "По убыванию"
     },
     "compactMode": "Компактный список",
-    "hideCompletedTasks": "Скрывать завершённые задачи"
+    "hideCompletedTasks": "Скрывать завершённые задачи",
+    "tasksKanban": "Канбан-доска задач"
   },
   "edit": {
     "label": "Правка",

@@ -58,15 +58,17 @@ export async function normalizeNotesSelectionState() {
     notesState.folderId = orderedFolders[0]?.id
   }
 
-  await getNotes()
+  const loaded = await getNotes()
 
   // Пустой список — это либо реально пустой vault, либо provisional-кэш
   // периода фоновой сверки: сохранённый выбор не сбрасывается (иначе он
   // затёрся бы в store.app и после reconcile не восстановился).
   if (
     notesState.noteId !== undefined
-    && displayedNotes.value?.length
-    && !displayedNotes.value.some(note => note.id === notesState.noteId)
+    && (displayedNotes.value?.length
+      || notesState.libraryFilter !== undefined
+      || useNotesApp().hideCompletedTasksInFolders.value)
+    && !displayedNotes.value?.some(note => note.id === notesState.noteId)
   ) {
     selectFirstNote()
   }
@@ -74,4 +76,5 @@ export async function normalizeNotesSelectionState() {
   // Список содержит только метаданные: полная запись выбранной заметки
   // загружается отдельно (boot и refresh после внешнего sync).
   await refreshSelectedNote()
+  return loaded
 }

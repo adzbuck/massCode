@@ -3,7 +3,7 @@ import * as ContextMenu from '@/components/ui/shadcn/context-menu'
 import { useNotes, useNotesApp } from '@/composables'
 import { useNotesWorkspaceNavigation } from '@/composables/spaces/notes/useNotesWorkspaceNavigation'
 import { LibraryFilter } from '@/composables/types'
-import { i18n } from '@/electron'
+import { i18n, store } from '@/electron'
 import { RouterName } from '@/router'
 import { onClickOutside } from '@vueuse/core'
 import {
@@ -11,6 +11,10 @@ import {
   CalendarCheck,
   CalendarClock,
   CheckCircle2,
+  ChevronRight,
+  Circle,
+  CircleAlert,
+  CircleDot,
   Inbox,
   ListTodo,
   Star,
@@ -53,6 +57,24 @@ const libraryItems = [
     isNested: true,
   },
   {
+    id: LibraryFilter.Todo,
+    name: i18n.t('notes.tasks.status.todo'),
+    icon: Circle,
+    isNested: true,
+  },
+  {
+    id: LibraryFilter.InProgress,
+    name: i18n.t('notes.tasks.status.inProgress'),
+    icon: CircleDot,
+    isNested: true,
+  },
+  {
+    id: LibraryFilter.Blocked,
+    name: i18n.t('notes.tasks.status.blocked'),
+    icon: CircleAlert,
+    isNested: true,
+  },
+  {
     id: LibraryFilter.Completed,
     name: i18n.t('notes.tasks.completed'),
     icon: CheckCircle2,
@@ -63,6 +85,17 @@ const libraryItems = [
 
 const focusedItemId = ref<string>()
 const itemRef = ref<HTMLElement>()
+const isTasksExpanded = ref(
+  store.app.get<boolean>('notes.layout.tasksExpanded') ?? true,
+)
+
+watch(isTasksExpanded, (value) => {
+  store.app.set('notes.layout.tasksExpanded', value)
+})
+
+const visibleLibraryItems = computed(() =>
+  libraryItems.filter(item => !item.isNested || isTasksExpanded.value),
+)
 
 function isItemSelected(item: (typeof libraryItems)[number]) {
   return (
@@ -90,7 +123,7 @@ onClickOutside(itemRef, () => {
       <ContextMenu.ContextMenuTrigger>
         <div class="px-1">
           <div
-            v-for="item in libraryItems"
+            v-for="item in visibleLibraryItems"
             :key="item.id"
             data-sidebar-item
             :data-selected="isItemSelected(item) ? 'true' : undefined"
@@ -104,8 +137,24 @@ onClickOutside(itemRef, () => {
           >
             <div
               class="flex items-center"
-              :class="item.isNested ? 'ml-9' : 'ml-5.5'"
+              :class="
+                item.isNested
+                  ? 'ml-9'
+                  : item.id === LibraryFilter.Tasks
+                    ? ''
+                    : 'ml-5.5'
+              "
             >
+              <div
+                v-if="item.id === LibraryFilter.Tasks"
+                class="mx-0.75 flex h-4 w-4 shrink-0 items-center justify-center"
+                @click.stop="isTasksExpanded = !isTasksExpanded"
+              >
+                <ChevronRight
+                  class="h-3 w-3"
+                  :class="{ 'rotate-90': isTasksExpanded }"
+                />
+              </div>
               <component
                 :is="item.icon"
                 class="mr-0.5 h-4 w-4"

@@ -2,11 +2,13 @@ import { beforeEach, expect, it, vi } from 'vitest'
 
 const mock = vi.hoisted(() => ({
   notes: {
+    hideCompletedTasksInFolders: { value: false },
     isNotesMindmapShown: { value: false },
     isNotesPresentationShown: { value: false },
     notesInspectorTab: { value: 'outline' },
     isNotesInspectorOpen: { value: false },
   },
+  normalizeNotesSelectionState: vi.fn(),
   route: { value: { name: 'http' } },
   dashboard: {
     dashboardError: { value: null },
@@ -49,6 +51,12 @@ vi.mock('@/composables/spaces/notes/useNotesDashboard', () => ({
 vi.mock('@/composables/spaces/notes/useNotesGraph', () => ({
   useNotesGraph: () => mock.graph,
 }))
+vi.mock(
+  '@/composables/spaces/notes/useNotesSelectionNormalization',
+  () => ({
+    normalizeNotesSelectionState: mock.normalizeNotesSelectionState,
+  }),
+)
 vi.mock('@/composables/spaces/http/useHttpApp', () => ({
   useHttpApp: () => ({}),
 }))

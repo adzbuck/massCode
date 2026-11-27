@@ -41,6 +41,7 @@ type MainMenuAction =
   | 'toggle-secondary-sidebar'
   | 'toggle-compact-mode'
   | 'toggle-hide-completed-tasks'
+  | 'toggle-tasks-kanban'
   | 'update-context'
   | 'goto-math-notebook'
 

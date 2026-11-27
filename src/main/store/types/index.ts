@@ -144,6 +144,7 @@ export interface AppStore {
     route: NotesRouteName
     editorMode: NotesEditorMode
     hideCompletedTasksInFolders: boolean
+    tasksKanbanView: boolean
     lastTasksCleanupAt: number
     dashboard: {
       widgets: NotesDashboardWidgets
@@ -154,6 +155,7 @@ export interface AppStore {
       inspectorWidth?: number
       mode: SpaceLayoutMode
       tagsListHeight: number
+      tasksExpanded?: boolean
       threePanel?: number[]
       twoPanel?: number
     }

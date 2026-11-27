@@ -7,6 +7,7 @@ import { useNotes } from '@/composables/spaces/notes/useNotes'
 import { useNotesApp } from '@/composables/spaces/notes/useNotesApp'
 import { useNotesDashboard } from '@/composables/spaces/notes/useNotesDashboard'
 import { useNotesGraph } from '@/composables/spaces/notes/useNotesGraph'
+import { normalizeNotesSelectionState } from '@/composables/spaces/notes/useNotesSelectionNormalization'
 import { useNotesWorkspaceNavigation } from '@/composables/spaces/notes/useNotesWorkspaceNavigation'
 import { useApp } from '@/composables/useApp'
 import { useContentSort } from '@/composables/useContentSort'
@@ -167,7 +168,9 @@ export async function executeWorkspaceView(
       = action.space === 'code'
         ? await useSnippets().getSnippets()
         : action.space === 'notes'
-          ? await useNotes().getNotes()
+          ? action.hideCompleted !== undefined
+            ? await normalizeNotesSelectionState()
+            : await useNotes().getNotes()
           : await useHttpRequests().getHttpRequests()
     if (!loaded)
       return { ...creation, status: 'failed' }

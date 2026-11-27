@@ -2,7 +2,7 @@ import { LibraryFilter } from '@/composables/types'
 import { router, RouterName } from '@/router'
 import { api } from '@/services/api'
 import { useNoteFolders } from './useNoteFolders'
-import { useNotes } from './useNotes'
+import { getLibraryFilterQuery, useNotes } from './useNotes'
 import { useNotesApp } from './useNotesApp'
 import { useNoteSearch } from './useNoteSearch'
 
@@ -34,42 +34,7 @@ export function useNotesWorkspaceNavigation() {
       notesState.libraryFilter = id
       useNoteFolders().clearFolderSelection()
       notesState.tagId = undefined
-      let loaded = false
-      if (id === LibraryFilter.Favorites) {
-        loaded = await getNotes({ isFavorites: 1 })
-      }
-      else if (id === LibraryFilter.Trash) {
-        loaded = await getNotes({ isDeleted: 1 })
-      }
-      else if (id === LibraryFilter.All) {
-        loaded = await getNotes({ isDeleted: 0 })
-      }
-      else if (id === LibraryFilter.Inbox) {
-        loaded = await getNotes({ isInbox: 1 })
-      }
-      else if (id === LibraryFilter.Tasks) {
-        loaded = await getNotes({ propertyType: 'task' })
-      }
-      else if (id === LibraryFilter.Today) {
-        loaded = await getNotes({
-          propertyDue: 'today',
-          propertyStatusNot: 'done',
-          propertyType: 'task',
-        })
-      }
-      else if (id === LibraryFilter.Upcoming) {
-        loaded = await getNotes({
-          propertyDue: 'upcoming',
-          propertyStatusNot: 'done',
-          propertyType: 'task',
-        })
-      }
-      else if (id === LibraryFilter.Completed) {
-        loaded = await getNotes({
-          propertyStatus: 'done',
-          propertyType: 'task',
-        })
-      }
+      const loaded = await getNotes(getLibraryFilterQuery(id))
 
       if (
         !loaded

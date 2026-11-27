@@ -136,6 +136,20 @@ function normalizePropertyDate(value: unknown): Date | undefined {
   return Number.isNaN(date.getTime()) ? undefined : date
 }
 
+function normalizeTaskOrNoteStatus(
+  properties: Record<string, unknown>,
+): string | undefined {
+  const status = normalizePropertyText(properties.status)
+
+  if (normalizePropertyText(properties.type) === 'task') {
+    return status === 'inProgress' || status === 'done' || status === 'blocked'
+      ? status
+      : 'todo'
+  }
+
+  return status
+}
+
 function applyNotePropertyFilters(
   note: MarkdownNote,
   query: NotesQueryInput,
@@ -149,14 +163,14 @@ function applyNotePropertyFilters(
 
   if (
     query.propertyStatus !== undefined
-    && normalizePropertyText(note.properties.status) !== query.propertyStatus
+    && normalizeTaskOrNoteStatus(note.properties) !== query.propertyStatus
   ) {
     return false
   }
 
   if (
     query.propertyStatusNot !== undefined
-    && normalizePropertyText(note.properties.status) === query.propertyStatusNot
+    && normalizeTaskOrNoteStatus(note.properties) === query.propertyStatusNot
   ) {
     return false
   }

@@ -60,7 +60,7 @@ Tasks can still appear in **Inbox**, **Favorites**, **All Notes**, folders, tags
 
 ## Hiding Completed Tasks
 
-When you are reviewing folders, select **View** > **Hide Completed Tasks** to hide tasks with Done status from folder lists. This does not delete or change the tasks; it only keeps completed items out of folder views while the option is enabled.
+When you are reviewing the **Tasks** view or folders, select **View** > **Hide Completed Tasks** to hide tasks with Done status from those lists. This does not delete or change the tasks; it only keeps completed items out of the **Tasks** and folder views while the option is enabled.
 
 ## Cleaning Up Completed Tasks
 

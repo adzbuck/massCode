@@ -36,6 +36,49 @@ vi.mock('../useNoteFolders', () => ({
   }),
 }))
 vi.mock('../useNotes', () => ({
+  getLibraryFilterQuery: (filter?: string) => {
+    if (filter === 'favorites')
+      return { isFavorites: 1 }
+    if (filter === 'trash')
+      return { isDeleted: 1 }
+    if (filter === 'all')
+      return { isDeleted: 0 }
+    if (filter === 'inbox')
+      return { isInbox: 1 }
+    if (filter === 'tasks')
+      return { propertyType: 'task' }
+    if (filter === 'today') {
+      return {
+        propertyDue: 'today',
+        propertyStatusNot: 'done',
+        propertyType: 'task',
+      }
+    }
+    if (filter === 'upcoming') {
+      return {
+        propertyDue: 'upcoming',
+        propertyStatusNot: 'done',
+        propertyType: 'task',
+      }
+    }
+    if (
+      filter === 'todo'
+      || filter === 'inProgress'
+      || filter === 'blocked'
+    ) {
+      return {
+        propertyStatus: filter,
+        propertyType: 'task',
+      }
+    }
+    if (filter === 'completed') {
+      return {
+        propertyStatus: 'done',
+        propertyType: 'task',
+      }
+    }
+    return {}
+  },
   useNotes: () => ({
     getNotes: mock.load,
     selectFirstNote: mock.select,
@@ -67,6 +110,9 @@ it.each([
       propertyStatusNot: 'done',
     },
   ],
+  ['todo', { propertyType: 'task', propertyStatus: 'todo' }],
+  ['inProgress', { propertyType: 'task', propertyStatus: 'inProgress' }],
+  ['blocked', { propertyType: 'task', propertyStatus: 'blocked' }],
   ['completed', { propertyType: 'task', propertyStatus: 'done' }],
 ] as const)(
   'loads the actual %s filter, clears competing filters and selects after success',
