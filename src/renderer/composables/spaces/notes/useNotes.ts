@@ -441,8 +441,11 @@ export async function getNotes(query?: NotesQuery) {
     }
 
     if (
-      resolvedQuery.folderId !== undefined
-      && hideCompletedTasksInFolders.value
+      hideCompletedTasksInFolders.value
+      && (resolvedQuery.folderId !== undefined
+        || (resolvedQuery.propertyType === 'task'
+          && resolvedQuery.propertyStatus === undefined
+          && resolvedQuery.propertyStatusNot === undefined))
     ) {
       resolvedQuery.hideCompletedTasks = 1
     }

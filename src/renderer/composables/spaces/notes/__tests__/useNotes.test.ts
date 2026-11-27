@@ -10,6 +10,7 @@ globalThis.watch = watch
 interface SetupOptions {
   confirmed?: boolean
   folderId?: number
+  hideCompletedTasksInFolders?: boolean
   isSearch?: boolean
   libraryFilter?: string
   nextNotes?: Array<{
@@ -39,7 +40,9 @@ async function setup(options: SetupOptions = {}) {
   const notesCreateKind = ref<'note' | 'task'>('note')
   const isSearch = ref(options.isSearch ?? false)
   const searchQuery = ref(options.searchQuery ?? '')
-  const hideCompletedTasksInFolders = ref(false)
+  const hideCompletedTasksInFolders = ref(
+    options.hideCompletedTasksInFolders ?? false,
+  )
   const nextNotes = options.nextNotes ?? [{ id: 2 }]
   const markPersistedStorageMutation = vi.fn()
   const patchNotesByIdProperties = vi.fn(async () => undefined)
@@ -478,6 +481,38 @@ describe('useNotes', () => {
       propertyStatusNot: 'done',
       propertyType: 'task',
       search: 'release',
+    })
+  })
+
+  it('hides completed tasks in folders and the Tasks library filter when enabled, while keeping Completed intact', async () => {
+    const tasksContext = await setup({
+      hideCompletedTasksInFolders: true,
+      libraryFilter: 'tasks',
+    })
+    await tasksContext.useNotes().getNotes()
+    expect(tasksContext.getNotes).toHaveBeenCalledWith({
+      hideCompletedTasks: 1,
+      propertyType: 'task',
+    })
+
+    const folderContext = await setup({
+      folderId: 3,
+      hideCompletedTasksInFolders: true,
+    })
+    await folderContext.useNotes().getNotes()
+    expect(folderContext.getNotes).toHaveBeenCalledWith({
+      folderId: 3,
+      hideCompletedTasks: 1,
+    })
+
+    const completedContext = await setup({
+      hideCompletedTasksInFolders: true,
+      libraryFilter: 'completed',
+    })
+    await completedContext.useNotes().getNotes()
+    expect(completedContext.getNotes).toHaveBeenCalledWith({
+      propertyStatus: 'done',
+      propertyType: 'task',
     })
   })
 

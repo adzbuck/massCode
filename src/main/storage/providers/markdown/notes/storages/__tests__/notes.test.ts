@@ -881,6 +881,22 @@ describe('notes storage validations', () => {
       expect(
         storage
           .getNotes({
+            hideCompletedTasks: 1,
+            propertyType: 'task',
+          })
+          .map(note => note.id),
+      ).toEqual(expect.arrayContaining([today.id, upcoming.id]))
+      expect(
+        storage
+          .getNotes({
+            hideCompletedTasks: 1,
+            propertyType: 'task',
+          })
+          .map(note => note.id),
+      ).not.toContain(done.id)
+      expect(
+        storage
+          .getNotes({
             propertyDue: 'today',
             propertyStatusNot: 'done',
             propertyType: 'task',
