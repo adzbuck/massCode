@@ -61,6 +61,16 @@ vi.mock('../useNotes', () => ({
         propertyType: 'task',
       }
     }
+    if (
+      filter === 'todo'
+      || filter === 'inProgress'
+      || filter === 'blocked'
+    ) {
+      return {
+        propertyStatus: filter,
+        propertyType: 'task',
+      }
+    }
     if (filter === 'completed') {
       return {
         propertyStatus: 'done',
