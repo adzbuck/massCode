@@ -2,8 +2,7 @@
   "confirm": {
     "delete": "Είστε βέβαιοι ότι θέλετε να διαγράψετε το \"{{name}}\"?",
     "deletePermanently": "Είστε βέβαιοι ότι θέλετε να διαγράψετε οριστικά το \"{{name}}\"?",
-    "deleteConfirmMultipleSnippets": "Είστε βέβαιοι ότι θέλετε να διαγράψετε οριστικά τα {{count}} επιλεγμένα snippets;",
-    "emptyTrash": "Είστε βέβαιοι ότι θέλετε να διαγράψετε οριστικά όλα τα snippets στον Κάδο Απορριμμάτων;"
+    "deleteConfirmMultipleSnippets": "Είστε βέβαιοι ότι θέλετε να διαγράψετε οριστικά τα {{count}} επιλεγμένα snippets;"
   },
   "success": {
     "copied": "Αντιγράφηκε στο πρόχειρο",
@@ -20,8 +19,7 @@
       "languages"
     ]
   },
-  "error": {
-  },
+  "error": {},
   "description": {
     "storageVault": "Choose the vault directory. To sync between devices, select a folder in iCloud Drive, Google Drive or Dropbox.",
     "language": "To apply language changes, you need to reload the app."

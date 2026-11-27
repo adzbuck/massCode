@@ -20,6 +20,7 @@ import {
   MoreHorizontal,
   Plus,
   Search,
+  Trash2,
   X,
 } from 'lucide-vue-next'
 
@@ -32,7 +33,7 @@ const props = withDefaults(
   },
 )
 
-const { isSearch, createNoteBySelectedKindAndSelect } = useNotes()
+const { isSearch, createNoteBySelectedKindAndSelect, emptyTrash } = useNotes()
 const {
   searchQuery,
   clearSearch,
@@ -60,6 +61,13 @@ async function onToggleTasksKanbanView() {
     await normalizeNotesSelectionState()
   }
 }
+
+const isViewingTrash = computed(
+  () =>
+    !notesState.folderId
+    && !notesState.tagId
+    && notesState.libraryFilter === LibraryFilter.Trash,
+)
 
 const libraryFilterLabels = computed<Record<string, string>>(() => ({
   [LibraryFilter.Inbox]: i18n.t('common.inbox'),
@@ -174,6 +182,15 @@ function onKeydown(event: KeyboardEvent) {
         <X class="h-4 w-4" />
       </UiActionButton>
       <UiActionButton
+        v-if="isViewingTrash"
+        data-notes-empty-trash
+        :disabled="!displayedNotes?.length"
+        :tooltip="i18n.t('action.delete.trash')"
+        @click="emptyTrash"
+      >
+        <Trash2 class="h-4 w-4" />
+      </UiActionButton>
+      <UiActionButton
         v-if="isViewingTasks"
         data-tasks-kanban-toggle
         :active="isTasksKanbanView"
@@ -189,7 +206,7 @@ function onKeydown(event: KeyboardEvent) {
         <Kanban class="h-4 w-4" />
       </UiActionButton>
       <UiActionButton
-        v-if="!searchQuery && !isSearch"
+        v-if="!searchQuery && !isSearch && !isViewingTrash"
         :tooltip="createActionTooltip"
         :shortcut="
           notesCreateKind === 'task'
@@ -201,7 +218,7 @@ function onKeydown(event: KeyboardEvent) {
         <Plus class="h-4 w-4" />
       </UiActionButton>
       <Popover.Popover
-        v-if="!searchQuery && !isSearch"
+        v-if="!searchQuery && !isSearch && !isViewingTrash"
         v-model:open="isCreateMenuOpen"
       >
         <Popover.PopoverTrigger as-child>

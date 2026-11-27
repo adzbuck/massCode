@@ -19,6 +19,7 @@ import {
   ListTodo,
   Star,
   Trash,
+  Trash2,
 } from 'lucide-vue-next'
 import { useRoute } from 'vue-router'
 
@@ -128,7 +129,7 @@ onClickOutside(itemRef, () => {
             data-sidebar-item
             :data-selected="isItemSelected(item) ? 'true' : undefined"
             :data-focused="focusedItemId === item.id ? 'true' : undefined"
-            class="data-[selected=true]:bg-accent data-[focused=true]:bg-primary! data-[focused=true]:text-primary-foreground rounded-md"
+            class="group data-[selected=true]:bg-accent data-[focused=true]:bg-primary! data-[focused=true]:text-primary-foreground rounded-md"
             :class="{
               'hover:bg-accent-hover':
                 !isItemSelected(item) && focusedItemId !== item.id,
@@ -157,11 +158,20 @@ onClickOutside(itemRef, () => {
               </div>
               <component
                 :is="item.icon"
-                class="mr-0.5 h-4 w-4"
+                class="mr-0.5 h-4 w-4 shrink-0"
               />
-              <div class="ml-1 select-none">
+              <div class="ml-1 min-w-0 flex-1 truncate select-none">
                 {{ item.name }}
               </div>
+              <UiActionButton
+                v-if="item.id === LibraryFilter.Trash"
+                data-notes-sidebar-empty-trash
+                :tooltip="i18n.t('action.delete.trash')"
+                class="mr-0.5 h-5 w-5 opacity-0 group-hover:opacity-100 group-data-[selected=true]:opacity-100 group-data-[focused=true]:text-inherit group-data-[focused=true]:opacity-100 [&_svg:not([class*='size-'])]:size-3.5"
+                @click.stop="emptyTrash"
+              >
+                <Trash2 class="size-3.5" />
+              </UiActionButton>
             </div>
           </div>
         </div>

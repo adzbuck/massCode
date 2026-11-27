@@ -6,7 +6,7 @@
     "unprotectHttpSecret": "Stop protecting \"{{name}}\"?",
     "deletePermanently": "Are you sure you want to permanently delete \"{{name}}\"?",
     "deleteConfirmMultipleSnippets": "Are you sure you want to permanently delete {{count}} selected snippets?",
-    "emptyTrash": "Are you sure you want to permanently delete all snippets in Trash?",
+    "emptyTrash": "Empty Trash?",
     "convertTaskToNote": "Convert \"{{name}}\" back to a note?",
     "moveVaultOverwrite": [
       "Overwrite selected directory?",

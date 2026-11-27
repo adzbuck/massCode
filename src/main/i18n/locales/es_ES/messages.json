@@ -2,8 +2,7 @@
   "confirm": {
     "delete": "¿Estás seguro de que quieres eliminar \"{{name}}\"?",
     "deletePermanently": "¿Estás seguro de que quieres eliminar permanentemente \"{{name}}\"?",
-    "deleteConfirmMultipleSnippets": "¿Estás seguro de que quieres eliminar permanentemente {{count}} snippets seleccionados?",
-    "emptyTrash": "¿Estás seguro de que quieres eliminar permanentemente todos los snippets de la Papelera?"
+    "deleteConfirmMultipleSnippets": "¿Estás seguro de que quieres eliminar permanentemente {{count}} snippets seleccionados?"
   },
   "success": {
     "copied": "Copiado al portapapeles",
@@ -20,8 +19,7 @@
       "languages"
     ]
   },
-  "error": {
-  },
+  "error": {},
   "description": {
     "storageVault": "Choose the vault directory. To sync between devices, select a folder in iCloud Drive, Google Drive or Dropbox.",
     "language": "To apply language changes, you need to reload the app."

@@ -54,6 +54,7 @@ async function setup(options: SetupOptions = {}) {
       tags: [],
     },
   }))
+  const deleteSnippetsTrash = vi.fn(async () => undefined)
   const postSnippetsByIdContents = vi.fn()
   const patchSnippetsByIdContentsOrder = vi.fn(async () => ({}))
 
@@ -97,7 +98,7 @@ async function setup(options: SetupOptions = {}) {
         deleteSnippetsById: vi.fn(),
         deleteSnippetsByIdContentsByContentId: vi.fn(),
         deleteSnippetsByIdTagsByTagId: vi.fn(),
-        deleteSnippetsTrash: vi.fn(),
+        deleteSnippetsTrash,
         getSnippets,
         // refreshSelectedSnippet дёргает загрузку полной записи по id:
         // отсутствие метода давало «зелёные» тесты с TypeError в stderr.
@@ -142,6 +143,7 @@ async function setup(options: SetupOptions = {}) {
   const snippets = useSnippets()
 
   return {
+    deleteSnippetsTrash,
     getSnippets,
     getSnippetsById,
     postSnippetsByIdContents,
@@ -635,5 +637,20 @@ describe('snippet fragment order', () => {
     resolve({})
     await pending
     expect(state.snippetContentIndex).toBe(1)
+  })
+
+  it('clears the selected snippet when emptying trash leaves no snippets', async () => {
+    const context = await setup({
+      libraryFilter: 'trash',
+      snippetId: 1,
+    })
+    context.getSnippets.mockResolvedValueOnce({ data: [] })
+
+    await context.snippets.emptyTrash()
+
+    expect(context.deleteSnippetsTrash).toHaveBeenCalledOnce()
+    expect(context.getSnippets).toHaveBeenCalledWith({ isDeleted: 1 })
+    expect(context.state.snippetId).toBeUndefined()
+    expect(context.snippets.selectedSnippetIds.value).toEqual([])
   })
 })

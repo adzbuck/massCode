@@ -882,6 +882,7 @@ async function emptyTrash() {
   if (isConfirmed) {
     await api.notes.deleteNotesTrash()
     await getNotes(queryByLibraryOrFolderOrSearch.value)
+    selectFirstNote()
   }
 }
 

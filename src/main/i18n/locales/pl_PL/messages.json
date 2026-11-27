@@ -2,8 +2,7 @@
   "confirm": {
     "delete": "Czy na pewno chcesz usunąć \"{{name}}\"?",
     "deletePermanently": "Czy na pewno chcesz trwale usunąć \"{{name}}\"?",
-    "deleteConfirmMultipleSnippets": "Czy na pewno chcesz trwale usunąć {{count}} wybranych fragmentów?",
-    "emptyTrash": "Czy na pewno chcesz trwale usunąć wszystkie fragmenty z Kosza?"
+    "deleteConfirmMultipleSnippets": "Czy na pewno chcesz trwale usunąć {{count}} wybranych fragmentów?"
   },
   "success": {
     "copied": "Skopiowano do schowka",
@@ -20,8 +19,7 @@
       "languages"
     ]
   },
-  "error": {
-  },
+  "error": {},
   "description": {
     "storageVault": "Choose the vault directory. To sync between devices, select a folder in iCloud Drive, Google Drive or Dropbox.",
     "language": "To apply language changes, you need to reload the app."

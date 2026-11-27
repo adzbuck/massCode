@@ -3,7 +3,7 @@ import { useApp, useFolders, useSnippets, useTags } from '@/composables'
 import { LibraryFilter } from '@/composables/types'
 import { i18n } from '@/electron'
 import { useDebounceFn } from '@vueuse/core'
-import { Plus, Search, X } from 'lucide-vue-next'
+import { Plus, Search, Trash2, X } from 'lucide-vue-next'
 
 const {
   isSearch,
@@ -14,10 +14,18 @@ const {
   searchSelectedIndex,
   selectSearchSnippet,
   displayedSnippets,
+  emptyTrash,
 } = useSnippets()
 const { isFocusedSearch, state } = useApp()
 const { folders, getFolderByIdFromTree } = useFolders()
 const { tags } = useTags()
+
+const isViewingTrash = computed(
+  () =>
+    !state.folderId
+    && !state.tagId
+    && state.libraryFilter === LibraryFilter.Trash,
+)
 
 const libraryFilterLabels = computed<Record<string, string>>(() => ({
   [LibraryFilter.Inbox]: i18n.t('common.inbox'),
@@ -108,7 +116,16 @@ function onKeydown(event: KeyboardEvent) {
         <X class="h-4 w-4" />
       </UiActionButton>
       <UiActionButton
-        v-else-if="!isSearch"
+        v-if="isViewingTrash"
+        data-snippets-empty-trash
+        :disabled="!displayedSnippets?.length"
+        :tooltip="i18n.t('action.delete.trash')"
+        @click="emptyTrash"
+      >
+        <Trash2 class="h-4 w-4" />
+      </UiActionButton>
+      <UiActionButton
+        v-if="!searchQuery && !isSearch && !isViewingTrash"
         :tooltip="i18n.t('action.new.snippet')"
         shortcut="CommandOrControl+N"
         @click="createSnippetAndSelect"

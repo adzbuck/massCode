@@ -6,7 +6,7 @@
     "unprotectHttpSecret": "Снять защиту с \"{{name}}\"?",
     "deletePermanently": "Вы уверены, что хотите навсегда удалить \"{{name}}\"?",
     "deleteConfirmMultipleSnippets": "Вы уверены, что хотите навсегда удалить {{count}} выбранных сниппетов?",
-    "emptyTrash": "Вы уверены, что хотите навсегда удалить все сниппеты из Корзины?",
+    "emptyTrash": "Очистить корзину?",
     "convertTaskToNote": "Преобразовать \"{{name}}\" обратно в заметку?",
     "vaultDoctorApply": [
       "Применить исправления vault?",
