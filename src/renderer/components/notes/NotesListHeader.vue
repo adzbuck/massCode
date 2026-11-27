@@ -266,7 +266,10 @@ function onKeydown(event: KeyboardEvent) {
     "
   >
     <div class="flex items-center px-1">
-      <Popover.Popover v-model:open="isSearchFilterMenuOpen">
+      <Popover.Popover
+        v-if="isTasksLibrarySelected || isViewingFolderOrTag"
+        v-model:open="isSearchFilterMenuOpen"
+      >
         <Popover.PopoverTrigger as-child>
           <UiActionButton
             data-notes-search-filters
@@ -306,6 +309,10 @@ function onKeydown(event: KeyboardEvent) {
           </Button>
         </Popover.PopoverContent>
       </Popover.Popover>
+      <Search
+        v-else
+        class="text-muted-foreground ml-1 h-4 w-4 shrink-0"
+      />
       <div class="min-w-0 flex-grow">
         <UiInput
           v-model="searchQuery"
