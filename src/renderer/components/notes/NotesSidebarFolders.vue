@@ -9,7 +9,6 @@ import {
   useNotes,
   useNotesApp,
   useNoteSearch,
-  useResizeHandle,
 } from '@/composables'
 import { i18n, store } from '@/electron'
 import { router, RouterName } from '@/router'
@@ -19,26 +18,10 @@ import {
 } from '@/utils'
 import { Folder, Plus } from 'lucide-vue-next'
 import { useRoute } from 'vue-router'
-import { LAYOUT_DEFAULTS } from '~/main/store/constants'
 import {
   getVisibleSelectedFolderIds,
   shouldHandleFolderClick,
 } from './notesSidebarSelection'
-
-const tagsHandleRef = ref<HTMLElement>()
-
-function normalizeTagsHeight(value: number | undefined) {
-  if (typeof value !== 'number' || Number.isNaN(value) || value < 100) {
-    return LAYOUT_DEFAULTS.tags.height
-  }
-  return Math.max(LAYOUT_DEFAULTS.tags.min, value)
-}
-
-const tagsHeight = ref(
-  normalizeTagsHeight(
-    store.app.get('notes.layout.tagsListHeight') as number | undefined,
-  ),
-)
 
 const foldersOpen = ref(
   store.app.get<boolean>('notes.layout.foldersOpen') ?? true,
@@ -54,19 +37,6 @@ watch(foldersOpen, (value) => {
 
 watch(tagsOpen, (value) => {
   store.app.set('notes.layout.tagsOpen', value)
-})
-
-useResizeHandle(tagsHandleRef, {
-  direction: 'vertical',
-  onMove(dy) {
-    tagsHeight.value = Math.max(
-      LAYOUT_DEFAULTS.tags.min,
-      tagsHeight.value - dy,
-    )
-  },
-  onEnd() {
-    store.app.set('notes.layout.tagsListHeight', tagsHeight.value)
-  },
 })
 
 const {
@@ -309,101 +279,72 @@ useDeleteShortcut({
       </UiActionButton>
     </template>
   </SidebarSectionHeader>
-  <div class="flex min-h-0 flex-1 flex-col">
-    <div
-      v-show="foldersOpen"
-      class="min-h-0 flex-1 overflow-hidden"
-    >
-      <div
-        data-notes-folders-tree
-        class="h-full min-h-0"
-      >
-        <ContextMenu.ContextMenu v-if="treeData.length">
-          <ContextMenu.ContextMenuTrigger as-child>
-            <UiTree
-              virtual
-              :active-id="selectedIds.length === 1 ? selectedIds[0] : undefined"
-              :model-value="treeData"
-              :selected-ids="selectedIds"
-              :editable-id="editableId"
-              :focused-id="focusedId"
-              :highlighted-ids="highlightedIds"
-              :get-validation-message="getFolderValidationMessage"
-              class="h-full px-0.5 pb-1"
-              @click-node="onClickNode"
-              @dblclick-node="onDblclickNode"
-              @toggle-node="onToggleNode"
-              @drag-node="onDragNode"
-              @external-drop="onExternalDrop"
-              @context-menu="onContextMenu"
-              @update-label="onUpdateLabel"
-              @cancel-edit="onCancelEdit"
-              @update:selected-ids="selectedIds = $event"
-              @update:editable-id="editableId = $event"
-              @update:focused-id="focusedId = $event"
-              @update:highlighted-ids="highlightedIds = $event"
-            >
-              <template #icon="{ node }">
-                <div class="mr-1.5 flex flex-shrink-0 items-center">
-                  <UiFolderIcon
-                    v-if="foldersById.get(Number(node.id))?.icon"
-                    :folder-id="Number(node.id)"
-                    :name="foldersById.get(Number(node.id))!.icon!"
-                    space-id="notes"
-                  />
-                  <Folder
-                    v-else
-                    class="h-4 w-4"
-                  />
-                </div>
-              </template>
-            </UiTree>
-          </ContextMenu.ContextMenuTrigger>
-          <NotesSidebarFolderContextMenu
-            :context-node="contextNode"
-            :editable-id="editableId"
-            @update:editable-id="editableId = $event"
-          />
-        </ContextMenu.ContextMenu>
-        <UiEmptyPlaceholder
-          v-else
-          :text="i18n.t('placeholder.emptyFoldersList')"
-        />
-      </div>
-    </div>
-    <div
-      v-show="foldersOpen && tagsOpen"
-      ref="tagsHandleRef"
-      class="before:bg-border hover:before:bg-primary data-[resizing]:before:bg-primary relative z-10 -mx-1 flex h-px shrink-0 cursor-row-resize items-center justify-center bg-transparent before:absolute before:inset-x-0 before:top-1/2 before:h-px before:-translate-y-1/2 before:transition-[background-color,height] before:duration-150 before:content-[''] after:absolute after:inset-x-0 after:top-1/2 after:h-3 after:-translate-y-1/2 after:content-[''] hover:before:h-0.5 hover:before:delay-200 data-[resizing]:before:h-0.5"
-    />
-    <div
-      :style="
-        !tagsOpen
-          ? { height: '36px' }
-          : foldersOpen
-            ? { height: `${tagsHeight}px` }
-            : undefined
-      "
-      class="overflow-hidden"
-      :class="[
-        !foldersOpen && tagsOpen ? 'min-h-0 flex-1' : 'shrink-0',
-        { '-mx-1 border-t px-1': !foldersOpen || !tagsOpen },
-      ]"
-    >
-      <div class="flex h-full min-h-0 flex-col">
-        <SidebarSectionHeader
-          v-model:open="tagsOpen"
-          collapsible
-          :title="i18n.t('common.tags')"
-          class="shrink-0"
-        />
-        <div
-          v-show="tagsOpen"
-          class="min-h-0 flex-1 px-1 pb-1"
+  <div
+    v-show="foldersOpen"
+    data-notes-folders-tree
+    class="shrink-0"
+  >
+    <ContextMenu.ContextMenu v-if="treeData.length">
+      <ContextMenu.ContextMenuTrigger as-child>
+        <UiTree
+          :active-id="selectedIds.length === 1 ? selectedIds[0] : undefined"
+          :model-value="treeData"
+          :selected-ids="selectedIds"
+          :editable-id="editableId"
+          :focused-id="focusedId"
+          :highlighted-ids="highlightedIds"
+          :get-validation-message="getFolderValidationMessage"
+          class="px-0.5 pb-1"
+          @click-node="onClickNode"
+          @dblclick-node="onDblclickNode"
+          @toggle-node="onToggleNode"
+          @drag-node="onDragNode"
+          @external-drop="onExternalDrop"
+          @context-menu="onContextMenu"
+          @update-label="onUpdateLabel"
+          @cancel-edit="onCancelEdit"
+          @update:selected-ids="selectedIds = $event"
+          @update:editable-id="editableId = $event"
+          @update:focused-id="focusedId = $event"
+          @update:highlighted-ids="highlightedIds = $event"
         >
-          <NotesSidebarTags />
-        </div>
-      </div>
-    </div>
+          <template #icon="{ node }">
+            <div class="mr-1.5 flex flex-shrink-0 items-center">
+              <UiFolderIcon
+                v-if="foldersById.get(Number(node.id))?.icon"
+                :folder-id="Number(node.id)"
+                :name="foldersById.get(Number(node.id))!.icon!"
+                space-id="notes"
+              />
+              <Folder
+                v-else
+                class="h-4 w-4"
+              />
+            </div>
+          </template>
+        </UiTree>
+      </ContextMenu.ContextMenuTrigger>
+      <NotesSidebarFolderContextMenu
+        :context-node="contextNode"
+        :editable-id="editableId"
+        @update:editable-id="editableId = $event"
+      />
+    </ContextMenu.ContextMenu>
+    <UiEmptyPlaceholder
+      v-else
+      :text="i18n.t('placeholder.emptyFoldersList')"
+    />
+  </div>
+  <SidebarSectionHeader
+    v-model:open="tagsOpen"
+    collapsible
+    :title="i18n.t('common.tags')"
+    class="shrink-0"
+  />
+  <div
+    v-show="tagsOpen"
+    class="shrink-0 pb-1"
+  >
+    <NotesSidebarTags />
   </div>
 </template>

@@ -43,7 +43,7 @@ async function openDashboard() {
 <template>
   <div
     data-notes-sidebar
-    class="flex h-full flex-col px-1"
+    class="scrollbar flex h-full flex-col overflow-x-hidden overflow-y-auto px-1"
     style="
       padding-top: calc(var(--content-top-offset) + var(--header-gap, 0px));
     "
