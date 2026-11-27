@@ -1329,7 +1329,8 @@
       "toTrash": "Move to Trash"
     },
     "remove": {
-      "fromFavorites": "Remove from Favorites"
+      "fromFavorites": "Remove from Favorites",
+      "fromFolder": "Remove from Folder"
     },
     "reveal": {
       "inFinder": "Reveal in Finder",

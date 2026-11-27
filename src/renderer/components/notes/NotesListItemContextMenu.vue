@@ -83,6 +83,7 @@ const isTrashLibrarySelected = computed(
     || notesState.libraryFilter === LibraryFilter.TasksTrash,
 )
 const isTask = computed(() => isTaskNote(props.note))
+const hasFolder = computed(() => Boolean(props.note.folder))
 
 const revealInFileManagerLabel = computed(() =>
   isMac
@@ -138,6 +139,27 @@ async function onRestore() {
   }
   else {
     await updateNote(props.note.id, { folderId: null, isDeleted: 0 })
+  }
+}
+
+async function onRemoveFromFolder() {
+  if (
+    selectedNoteIds.value.length > 1
+    && selectedNoteIds.value.includes(props.note.id)
+  ) {
+    const notesData = selectedNoteIds.value.map(() => ({ folderId: null }))
+    await updateNotes(selectedNoteIds.value, notesData)
+  }
+  else {
+    await updateNote(props.note.id, { folderId: null })
+  }
+
+  if (
+    notesState.folderId !== undefined
+    && (selectedNoteIds.value.length > 1
+      || notesState.noteId === props.note.id)
+  ) {
+    selectFirstNote()
   }
 }
 
@@ -286,6 +308,14 @@ async function onConvertToNote() {
         @click="onConvertToNote"
       >
         {{ i18n.t("notes.tasks.convertToNote") }}
+      </ContextMenu.ContextMenuItem>
+      <ContextMenu.ContextMenuItem
+        v-if="hasFolder"
+        data-note-remove-from-folder
+        :disabled="isCloudPending"
+        @click="onRemoveFromFolder"
+      >
+        {{ i18n.t("action.remove.fromFolder") }}
       </ContextMenu.ContextMenuItem>
       <ContextMenu.ContextMenuSeparator />
     </template>

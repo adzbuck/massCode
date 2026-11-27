@@ -101,6 +101,7 @@ function onDragStart(noteId: number, event: DragEvent) {
   if (event.dataTransfer) {
     event.dataTransfer.effectAllowed = 'move'
     event.dataTransfer.setData('text/plain', String(noteId))
+    event.dataTransfer.setData('noteIds', JSON.stringify([noteId]))
   }
 }
 

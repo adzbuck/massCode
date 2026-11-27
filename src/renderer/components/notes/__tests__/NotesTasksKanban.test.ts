@@ -125,4 +125,55 @@ describe('notesTasksKanban', () => {
       }
     },
   )
+
+  it('includes noteIds in dataTransfer on dragstart so kanban tasks can be dropped on folders or Inbox', async () => {
+    Object.entries({ computed, ref }).forEach(([key, value]) =>
+      vi.stubGlobal(key, value),
+    )
+
+    const component = (await import('../NotesTasksKanban.vue')).default
+    let setupState: any
+    const renderer = createRenderer({
+      patchProp() {},
+      insert() {},
+      remove() {},
+      createElement: () => ({}),
+      createText: () => ({}),
+      createComment: () => ({}),
+      setText() {},
+      setElementText() {},
+      parentNode: () => null,
+      nextSibling: () => null,
+    })
+
+    const app = renderer.createApp(
+      defineComponent({
+        setup() {
+          setupState = (component as any).setup(
+            { activeNoteId: undefined },
+            { emit: () => {}, expose() {} },
+          )
+          return () => null
+        },
+      }),
+    )
+    app.provide(ssrContextKey, {})
+    app.mount({})
+
+    try {
+      const setData = vi.fn()
+      const dataTransfer = {
+        effectAllowed: 'none',
+        setData,
+      }
+      setupState.onDragStart(17, { dataTransfer } as unknown as DragEvent)
+
+      expect(dataTransfer.effectAllowed).toBe('move')
+      expect(setData).toHaveBeenCalledWith('text/plain', '17')
+      expect(setData).toHaveBeenCalledWith('noteIds', '[17]')
+    }
+    finally {
+      app.unmount()
+    }
+  })
 })
