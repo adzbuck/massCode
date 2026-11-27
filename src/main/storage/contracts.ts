@@ -266,7 +266,7 @@ export interface NotesQueryInput {
   isFavorites?: number
   isDeleted?: number
   isInbox?: number
-  propertyDue?: 'today' | 'upcoming'
+  propertyDue?: string
   propertyStatus?: string
   propertyStatusNot?: string
   propertyType?: string

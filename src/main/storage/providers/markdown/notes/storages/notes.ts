@@ -16,7 +16,13 @@ import type {
   NotesState,
 } from '../runtime/types'
 import path from 'node:path'
-import { isAfter, isToday, parseISO, startOfToday } from 'date-fns'
+import {
+  differenceInCalendarDays,
+  isAfter,
+  isToday,
+  parseISO,
+  startOfToday,
+} from 'date-fns'
 import { scheduleDockBadgeRefresh } from '../../../../../dockBadge'
 import { PartialCreateError } from '../../../../partialCreateError'
 import { prioritizeCloudDownload } from '../../cloudDownloads'
@@ -150,6 +156,54 @@ function normalizeTaskOrNoteStatus(
   return status
 }
 
+const RELATIVE_DUE_FILTER_RE
+  = /^(<=|>=|[<>=])?(\d+)([dwmy]|day|days|week|weeks|month|months|year|years)$/i
+
+function matchesPropertyDueFilter(due: Date, propertyDue: string): boolean {
+  const normalized = propertyDue.trim().toLowerCase()
+  if (normalized === 'today') {
+    return isToday(due)
+  }
+
+  if (normalized === 'upcoming') {
+    return isAfter(due, startOfToday()) && !isToday(due)
+  }
+
+  const match = normalized.match(RELATIVE_DUE_FILTER_RE)
+  if (!match) {
+    return false
+  }
+
+  const operator = match[1] || '='
+  const amount = Number(match[2])
+  const unit = match[3]
+  const unitMultiplier
+    = unit.startsWith('w')
+      ? 7
+      : unit.startsWith('m')
+        ? 30
+        : unit.startsWith('y')
+          ? 365
+          : 1
+  const targetDays = amount * unitMultiplier
+  const diffDays = differenceInCalendarDays(due, startOfToday())
+
+  if (operator === '<') {
+    return diffDays >= 0 && diffDays < targetDays
+  }
+  if (operator === '<=') {
+    return diffDays >= 0 && diffDays <= targetDays
+  }
+  if (operator === '>') {
+    return diffDays > targetDays
+  }
+  if (operator === '>=') {
+    return diffDays >= targetDays
+  }
+
+  return diffDays === targetDays
+}
+
 function applyNotePropertyFilters(
   note: MarkdownNote,
   query: NotesQueryInput,
@@ -196,13 +250,7 @@ function applyNotePropertyFilters(
       return false
     }
 
-    if (query.propertyDue === 'today') {
-      return isToday(due)
-    }
-
-    if (query.propertyDue === 'upcoming') {
-      return isAfter(due, startOfToday()) && !isToday(due)
-    }
+    return matchesPropertyDueFilter(due, query.propertyDue)
   }
 
   return true

@@ -7,6 +7,7 @@ import { markPersistedStorageMutation } from '@/composables/useStorageMutation'
 import { i18n, ipc, store } from '@/electron'
 import { getContiguousSelection } from '@/utils'
 import { benchmarkStart } from '@/utils/benchmark'
+import { differenceInCalendarDays, parseISO, startOfToday } from 'date-fns'
 import { api } from '~/renderer/services/api'
 import { LibraryFilter } from '../../types'
 import { NoteTaskStatus, type NoteTaskStatusValue } from './taskProperties'
@@ -72,7 +73,7 @@ interface NotesQuery {
   isFavorites?: number
   isDeleted?: number
   isInbox?: number
-  propertyDue?: 'today' | 'upcoming'
+  propertyDue?: string
   propertyStatus?: string
   propertyStatusNot?: string
   propertyType?: string
@@ -264,6 +265,84 @@ const TASK_STATUS_FILTER_TOKENS: Record<string, NoteTaskStatusValue> = {
   'todo': NoteTaskStatus.Todo,
 }
 
+const RELATIVE_DUE_FILTER_RE
+  = /^(<=|>=|[<>=])?(\d+)([dwmy]|day|days|week|weeks|month|months|year|years)$/i
+
+function isValidDueFilterValue(value: string): boolean {
+  return (
+    value === 'today'
+    || value === 'upcoming'
+    || RELATIVE_DUE_FILTER_RE.test(value)
+  )
+}
+
+function parseClientDueDate(value: unknown): Date | undefined {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value
+  }
+  if (typeof value === 'string') {
+    const trimmed = value.trim()
+    if (!trimmed) {
+      return undefined
+    }
+    const parsed = parseISO(trimmed)
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed
+    }
+    const fallback = new Date(trimmed)
+    return Number.isNaN(fallback.getTime()) ? undefined : fallback
+  }
+  if (typeof value === 'number') {
+    const date = new Date(value)
+    return Number.isNaN(date.getTime()) ? undefined : date
+  }
+  return undefined
+}
+
+function matchesRelativeDueFilter(
+  rawDue: unknown,
+  propertyDue: string,
+): boolean {
+  const match = propertyDue.trim().toLowerCase().match(RELATIVE_DUE_FILTER_RE)
+  if (!match) {
+    return true
+  }
+
+  const due = parseClientDueDate(rawDue)
+  if (!due) {
+    return false
+  }
+
+  const operator = match[1] || '='
+  const amount = Number(match[2])
+  const unit = match[3]
+  const unitMultiplier
+    = unit.startsWith('w')
+      ? 7
+      : unit.startsWith('m')
+        ? 30
+        : unit.startsWith('y')
+          ? 365
+          : 1
+  const targetDays = amount * unitMultiplier
+  const diffDays = differenceInCalendarDays(due, startOfToday())
+
+  if (operator === '<') {
+    return diffDays >= 0 && diffDays < targetDays
+  }
+  if (operator === '<=') {
+    return diffDays >= 0 && diffDays <= targetDays
+  }
+  if (operator === '>') {
+    return diffDays > targetDays
+  }
+  if (operator === '>=') {
+    return diffDays >= targetDays
+  }
+
+  return diffDays === targetDays
+}
+
 export function parseNotesSearchQuery(rawQuery?: string): NotesQuery {
   if (!rawQuery) {
     return {}
@@ -275,19 +354,15 @@ export function parseNotesSearchQuery(rawQuery?: string): NotesQuery {
 
   for (const word of words) {
     const lower = word.toLowerCase()
-    if (lower === 'due:today') {
-      parsed.propertyDue = 'today'
-      parsed.propertyStatusNot = 'done'
-      parsed.propertyType = 'task'
-      delete parsed.propertyTypeNot
-      continue
-    }
-    if (lower === 'due:upcoming') {
-      parsed.propertyDue = 'upcoming'
-      parsed.propertyStatusNot = 'done'
-      parsed.propertyType = 'task'
-      delete parsed.propertyTypeNot
-      continue
+    if (lower.startsWith('due:')) {
+      const token = lower.slice('due:'.length)
+      if (isValidDueFilterValue(token)) {
+        parsed.propertyDue = token
+        parsed.propertyStatusNot = 'done'
+        parsed.propertyType = 'task'
+        delete parsed.propertyTypeNot
+        continue
+      }
     }
     if (lower.startsWith('status:')) {
       const token = lower.slice('status:'.length)
@@ -481,6 +556,15 @@ function matchesNoteTypeQuery(
     query.propertyType !== undefined
     && note.properties !== undefined
     && note.properties.type !== query.propertyType
+  ) {
+    return false
+  }
+
+  if (
+    query.propertyDue !== undefined
+    && note.properties !== undefined
+    && RELATIVE_DUE_FILTER_RE.test(query.propertyDue)
+    && !matchesRelativeDueFilter(note.properties.due, query.propertyDue)
   ) {
     return false
   }

@@ -687,6 +687,32 @@ describe('useNotes', () => {
       propertyType: 'task',
       search: 'release',
     })
+
+    const relativeCtx = await setup({
+      isSearch: true,
+      libraryFilter: 'tasks',
+      searchQuery: 'due:<5days sprint',
+    })
+    await relativeCtx.useNotes().getNotes()
+    expect(relativeCtx.getNotes).toHaveBeenCalledWith({
+      propertyDue: '<5days',
+      propertyStatusNot: 'done',
+      propertyType: 'task',
+      search: 'sprint',
+    })
+
+    const weeksCtx = await setup({
+      isSearch: true,
+      libraryFilter: 'tasks',
+      searchQuery: 'due:>3weeks roadmap',
+    })
+    await weeksCtx.useNotes().getNotes()
+    expect(weeksCtx.getNotes).toHaveBeenCalledWith({
+      propertyDue: '>3weeks',
+      propertyStatusNot: 'done',
+      propertyType: 'task',
+      search: 'roadmap',
+    })
   })
 
   it('queries tasksInbox, tasksFavorites, and tasksTrash filters strictly for tasks', async () => {

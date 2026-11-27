@@ -68,13 +68,13 @@ const isSearchFilterMenuOpen = ref(false)
 
 const searchFilterOptions = computed(() => [
   {
-    token: 'due:today',
+    token: 'due:<1day',
     label: i18n.t('notes.tasks.today'),
     icon: CalendarCheck,
     group: 'due',
   },
   {
-    token: 'due:upcoming',
+    token: 'due:<5days',
     label: i18n.t('notes.tasks.upcoming'),
     icon: CalendarClock,
     group: 'due',

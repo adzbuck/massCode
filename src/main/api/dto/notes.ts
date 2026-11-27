@@ -93,9 +93,7 @@ export const notesDTO = new Elysia().model({
     isFavorites: t.Optional(t.Number({ minimum: 0, maximum: 1 })),
     isDeleted: t.Optional(t.Number({ minimum: 0, maximum: 1 })),
     isInbox: t.Optional(t.Number({ minimum: 0, maximum: 1 })),
-    propertyDue: t.Optional(
-      t.Union([t.Literal('today'), t.Literal('upcoming')]),
-    ),
+    propertyDue: t.Optional(t.String()),
     propertyStatus: t.Optional(t.String()),
     propertyStatusNot: t.Optional(t.String()),
     propertyType: t.Optional(t.String()),
