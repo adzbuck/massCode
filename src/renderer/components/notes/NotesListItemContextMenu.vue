@@ -90,6 +90,11 @@ const revealInFileManagerLabel = computed(() =>
     ? i18n.t('action.reveal.inFinder')
     : i18n.t('action.reveal.inFileManager'),
 )
+const removeFromFolderLabel = computed(() =>
+  i18n.t('action.remove.fromFolder', {
+    defaultValue: 'Remove from Folder',
+  }),
+)
 
 // Содержимое ещё в облаке: мутации (запись файла) и копирование тела
 // недоступны до докачки; чтение метаданных и ссылки работают.
@@ -315,7 +320,7 @@ async function onConvertToNote() {
         :disabled="isCloudPending"
         @click="onRemoveFromFolder"
       >
-        {{ i18n.t("action.remove.fromFolder") }}
+        {{ removeFromFolderLabel }}
       </ContextMenu.ContextMenuItem>
       <ContextMenu.ContextMenuSeparator />
     </template>
