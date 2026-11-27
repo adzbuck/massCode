@@ -3,7 +3,7 @@ import * as ContextMenu from '@/components/ui/shadcn/context-menu'
 import { useNotes, useNotesApp } from '@/composables'
 import { useNotesWorkspaceNavigation } from '@/composables/spaces/notes/useNotesWorkspaceNavigation'
 import { LibraryFilter } from '@/composables/types'
-import { i18n } from '@/electron'
+import { i18n, store } from '@/electron'
 import { RouterName } from '@/router'
 import { onClickOutside } from '@vueuse/core'
 import {
@@ -85,7 +85,13 @@ const libraryItems = [
 
 const focusedItemId = ref<string>()
 const itemRef = ref<HTMLElement>()
-const isTasksExpanded = ref(true)
+const isTasksExpanded = ref(
+  store.app.get<boolean>('notes.layout.tasksExpanded') ?? true,
+)
+
+watch(isTasksExpanded, (value) => {
+  store.app.set('notes.layout.tasksExpanded', value)
+})
 
 const visibleLibraryItems = computed(() =>
   libraryItems.filter(item => !item.isNested || isTasksExpanded.value),

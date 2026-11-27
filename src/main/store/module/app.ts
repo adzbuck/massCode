@@ -93,6 +93,7 @@ const APP_STORE_DEFAULTS: AppStore = {
     layout: {
       mode: 'all-panels',
       tagsListHeight: LAYOUT_DEFAULTS.tags.height,
+      tasksExpanded: true,
     },
   },
   math: {
@@ -880,6 +881,7 @@ function sanitizeAppStore(value: unknown): AppStore {
           )
           return raw < 100 ? LAYOUT_DEFAULTS.tags.height : raw
         })(),
+        tasksExpanded: notesLayoutSource.tasksExpanded !== false,
         threePanel:
           readOptionalNumberArray(notesLayoutSource, 'threePanel')
           || readOptionalNumberArray(legacySizes, 'notesLayout'),

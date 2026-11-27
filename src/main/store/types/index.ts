@@ -154,6 +154,7 @@ export interface AppStore {
       inspectorWidth?: number
       mode: SpaceLayoutMode
       tagsListHeight: number
+      tasksExpanded?: boolean
       threePanel?: number[]
       twoPanel?: number
     }
