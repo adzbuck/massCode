@@ -674,14 +674,32 @@ export async function getNotes(query?: NotesQuery) {
       resolvedQuery.search,
     )
     try {
-      const { data: responseData } = await api.notes.getNotes(resolvedQuery)
+      let responseData: NotesResponse
+      try {
+        const response = await api.notes.getNotes(resolvedQuery)
+        responseData = response.data as NotesResponse
+      }
+      catch (error) {
+        if (
+          resolvedQuery.propertyDue
+          && resolvedQuery.propertyDue !== 'today'
+          && resolvedQuery.propertyDue !== 'upcoming'
+        ) {
+          const { propertyDue: _ignoredDue, ...fallbackQuery } = resolvedQuery
+          const response = await api.notes.getNotes(fallbackQuery)
+          responseData = response.data as NotesResponse
+        }
+        else {
+          throw error
+        }
+      }
 
       if (requestToken !== notesRequestToken) {
         finishBenchmark('superseded')
         return false
       }
 
-      const data = (responseData as NotesResponse).filter(note =>
+      const data = responseData.filter(note =>
         matchesNoteTypeQuery(note, resolvedQuery),
       )
 
