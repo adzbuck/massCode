@@ -134,6 +134,7 @@ export interface AppStore {
       inspectorWidth?: number
       libraryOpen?: boolean
       foldersOpen?: boolean
+      tagsOpen?: boolean
       mode: SpaceLayoutMode
       tagsListHeight: number
       threePanel?: number[]
@@ -156,6 +157,7 @@ export interface AppStore {
       inspectorWidth?: number
       libraryOpen?: boolean
       foldersOpen?: boolean
+      tagsOpen?: boolean
       mode: SpaceLayoutMode
       tagsListHeight: number
       threePanel?: number[]

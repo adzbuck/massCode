@@ -56,6 +56,7 @@ const APP_STORE_DEFAULTS: AppStore = {
       inspectorWidth: 340,
       libraryOpen: true,
       foldersOpen: true,
+      tagsOpen: true,
       tagsListHeight: LAYOUT_DEFAULTS.tags.height,
     },
   },
@@ -96,6 +97,7 @@ const APP_STORE_DEFAULTS: AppStore = {
       mode: 'all-panels',
       libraryOpen: true,
       foldersOpen: true,
+      tagsOpen: true,
       tagsListHeight: LAYOUT_DEFAULTS.tags.height,
     },
   },
@@ -711,6 +713,7 @@ function sanitizeAppStore(value: unknown): AppStore {
         ),
         libraryOpen: codeLayoutSource.libraryOpen !== false,
         foldersOpen: codeLayoutSource.foldersOpen !== false,
+        tagsOpen: codeLayoutSource.tagsOpen !== false,
         tagsListHeight: (() => {
           const raw = readNumber(
             codeLayoutSource,
@@ -870,6 +873,7 @@ function sanitizeAppStore(value: unknown): AppStore {
         ),
         libraryOpen: notesLayoutSource.libraryOpen !== false,
         foldersOpen: notesLayoutSource.foldersOpen !== false,
+        tagsOpen: notesLayoutSource.tagsOpen !== false,
         mode: readEnum(
           notesLayoutSource,
           'mode',
